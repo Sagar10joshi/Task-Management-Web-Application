@@ -6,6 +6,7 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { BiLogoProductHunt } from 'react-icons/bi';
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../api/auth";
+import toast from "react-hot-toast";
 // import Link from 'next/link';
 
 export default function Login() {
@@ -49,9 +50,11 @@ export default function Login() {
             password
         });
 
-        console.log("Login success:", res);
+        toast.success("Login successful!");
 
-        alert("Login successful!");
+        // console.log("Login success:", res);
+
+        // alert("Login successful!");
 
         // Redirect to dashboard
         navigate("/dashboard");
@@ -59,7 +62,8 @@ export default function Login() {
     } catch (error) {
         console.log(error);
 
-        alert(error.message || "Login failed");
+        // alert(error.message || "Login failed");
+        toast.error(error.message || "Login failed");
     } finally {
         setLoading(false);
     }

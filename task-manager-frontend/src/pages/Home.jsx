@@ -694,13 +694,6 @@ const Home = () => {
               >
                 Create Account <FiArrowRight className="w-5 h-5" />
               </motion.button>
-              {/* <motion.button
-                className="px-8 py-4 border-2 border-white text-white rounded-lg font-bold hover:bg-white/10 transition-colors"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Sign In
-              </motion.button> */}
 
               {!isLoggedIn && (
                 <motion.button
@@ -718,93 +711,49 @@ const Home = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-900 text-slate-300 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            {/* Brand */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold">T</span>
-                </div>
-                <span className="text-lg font-bold text-white">TaskFlow</span>
+      <footer className="bg-slate-900 py-10 px-4">
+        <div className="max-w-6xl mx-auto">
+
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+
+            {/* Left Side - Brand */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-lg">T</span>
               </div>
-              <p className="text-sm text-slate-400">
-                Organize. Track. Succeed.
+
+              <div>
+                <h3 className="text-white text-xl font-bold">
+                  TaskFlow
+                </h3>
+                <p className="text-slate-400 text-sm">
+                  Organize. Track. Succeed.
+                </p>
+              </div>
+            </div>
+
+            {/* Right Side - Message */}
+            <div className="text-center md:text-right">
+              <p className="text-slate-300 font-medium">
+                Turn your goals into completed tasks.
+              </p>
+              <p className="text-slate-500 text-sm mt-1">
+                Stay focused, productive, and in control.
               </p>
             </div>
 
-            {/* Links */}
-            <div>
-              <h4 className="font-semibold text-white mb-4">Product</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <button className="hover:text-white transition-colors">Features</button>
-                </li>
-                <li>
-                  <button className="hover:text-white transition-colors">Pricing</button>
-                </li>
-                <li>
-                  <button className="hover:text-white transition-colors">Security</button>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold text-white mb-4">Company</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <button className="hover:text-white transition-colors">About</button>
-                </li>
-                <li>
-                  <button className="hover:text-white transition-colors">Blog</button>
-                </li>
-                <li>
-                  <button className="hover:text-white transition-colors">Contact</button>
-                </li>
-              </ul>
-            </div>
-
-            {/* Social */}
-            <div>
-              <h4 className="font-semibold text-white mb-4">Follow Us</h4>
-              <div className="flex gap-4">
-                <motion.button
-                  className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center hover:bg-indigo-600 transition-colors"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <FiGithub className="w-5 h-5" />
-                </motion.button>
-                <motion.button
-                  className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center hover:bg-indigo-600 transition-colors"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <FiLinkedin className="w-5 h-5" />
-                </motion.button>
-                <motion.button
-                  className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center hover:bg-indigo-600 transition-colors"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <FiTwitter className="w-5 h-5" />
-                </motion.button>
-              </div>
-            </div>
           </div>
 
           {/* Divider */}
-          <div className="border-t border-slate-800 my-8" />
+          <div className="border-t border-slate-800 my-6" />
 
-          {/* Bottom */}
-          <div className="flex flex-col md:flex-row items-center justify-between text-sm text-slate-400">
-            <p>&copy; 2024 TaskFlow. All rights reserved.</p>
-            <div className="flex gap-4 mt-4 md:mt-0">
-              <button className="hover:text-white transition-colors">Privacy Policy</button>
-              <button className="hover:text-white transition-colors">Terms of Service</button>
-            </div>
+          {/* Copyright */}
+          <div className="text-center">
+            <p className="text-sm text-slate-400">
+               © {new Date().getFullYear()} TaskFlow. All rights reserved.
+            </p>
           </div>
+
         </div>
       </footer>
     </div>

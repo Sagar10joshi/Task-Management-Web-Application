@@ -7,6 +7,7 @@ import { BiLogoProductHunt } from 'react-icons/bi';
 import { BsCheckCircleFill, BsXCircleFill } from 'react-icons/bs';
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "../api/auth"; // adjust path if needed
+import toast from "react-hot-toast";
 // import Link from 'next/link';
 
 export default function Register() {
@@ -98,16 +99,19 @@ export default function Register() {
         password: formData.password
       });
 
-      console.log("User registered:", res);
+      toast.success("User registration successful!");
 
-      alert("Account created successfully!");
+      // console.log("User registered:", res);
+
+      // alert("Account created successfully!");
 
       navigate("/login");
 
     } catch (error) {
       console.log(error);
 
-      alert(error.message || "Registration failed");
+      // alert(error.message || "Registration failed");
+      toast.error(error.message || "Registration failed");
     } 
     finally {
       setLoading(false);

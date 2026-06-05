@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { MdCheck } from "react-icons/md";
 import {
   AiOutlineLogout,
   AiOutlinePlus,
@@ -47,16 +48,36 @@ export default function Dashboard() {
   }, []);
 
   // Filter and search tasks
+  // const filteredTasks = useMemo(() => {
+  //   return tasks.filter(task => {
+  //     const matchesSearch = task.title
+  //       .toLowerCase()
+  //       .includes(searchTerm.toLowerCase());
+  //     const matchesFilter =
+  //       filterStatus === 'all' || task.status === filterStatus;
+  //     return matchesSearch && matchesFilter;
+  //   });
+  // }, [tasks, searchTerm, filterStatus]);
+
   const filteredTasks = useMemo(() => {
-    return tasks.filter(task => {
+  return tasks
+    .filter(task => {
       const matchesSearch = task.title
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
+
       const matchesFilter =
         filterStatus === 'all' || task.status === filterStatus;
+
       return matchesSearch && matchesFilter;
+    })
+    .sort((a, b) => {
+      // pending first, completed last
+      if (a.status === b.status) return 0;
+      if (a.status === 'pending') return -1;
+      return 1;
     });
-  }, [tasks, searchTerm, filterStatus]);
+}, [tasks, searchTerm, filterStatus]);
 
   // Statistics
   const statistics = useMemo(() => {
@@ -259,24 +280,32 @@ export default function Dashboard() {
 
               {/* User Section */}
               <div className="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
+
+                {/* User Avatar */}
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
                   {user?.name?.charAt(0)?.toUpperCase()}
                 </div>
-                <div className="hidden sm:block">
+
+                {/* User Info */}
+                <div className="hidden sm:block pr-3 border-r border-slate-200 dark:border-slate-700">
                   <p className="text-sm font-semibold">{user?.name}</p>
                   <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                     {user?.email}
                   </p>
                 </div>
+
+                {/* Logout */}
                 <motion.button
                   onClick={handleLogout}
-                  whileHover={{ scale: 1.1 }}
+                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-red-500 transition-colors"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
                   title="Logout"
                 >
-                  <AiOutlineLogout size={20} />
+                  <AiOutlineLogout size={18} />
+                  <span className="text-sm font-medium">Logout</span>
                 </motion.button>
+
               </div>
             </div>
           </div>
@@ -422,60 +451,123 @@ export default function Dashboard() {
               {filteredTasks.map((task, idx) => (
                 <motion.div
                   key={task._id}
-                  className={`${cardClass} rounded-xl p-6 border shadow-sm`}
+                  className={`
+            rounded-xl p-6 border shadow-sm transition-all
+            ${task.status === "completed"
+                      ? isDark
+                        ? "bg-green-950/20 border-green-800"
+                        : "bg-green-50 border-green-200"
+                      : cardClass
+                    }
+              `}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ delay: idx * 0.05 }}
-                  whileHover={{ translateX: 5 }}
+                  whileHover={{ y: -2 }}
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 flex gap-4">
+                      {/* Square Toggle */}
                       <motion.button
-                        whileHover={{ scale: 1.2 }}
+                        whileHover={{ scale: 1.08 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => handleToggleStatus(task._id)}
-                        className="flex-shrink-0 mt-1 text-2xl focus:outline-none"
+                        className="flex-shrink-0 mt-1 focus:outline-none"
                       >
-                        {task.status === 'completed' ? (
-                          <MdCheckCircle className="text-green-500" />
-                        ) : (
-                          <BsCircle
-                            className={`${isDark
-                              ? 'text-slate-600'
-                              : 'text-slate-300'
-                              }`}
-                          />
-                        )}
+                        <div
+                          className={`
+                w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all
+                ${task.status === "completed"
+                              ? "bg-green-500 border-green-500"
+                              : isDark
+                                ? "border-slate-500 bg-slate-800"
+                                : "border-slate-400 bg-white"
+                            }
+              `}
+                        >
+                          {task.status === "completed" && (
+                            <MdCheck
+                              className="text-white"
+                              size={16}
+                            />
+                          )}
+                        </div>
                       </motion.button>
 
                       <div className="flex-1">
                         <h3
-                          className={`text-lg font-semibold ${task.status === 'completed'
-                            ? 'line-through ' + (isDark ? 'text-slate-500' : 'text-slate-400')
-                            : ''
-                            }`}
+                          className={`
+    text-lg font-semibold transition-all flex items-center gap-2
+    ${task.status === "completed"
+                              ? isDark
+                                ? "line-through text-slate-400"
+                                : "line-through text-slate-500"
+                              : isDark
+                                ? "text-white"
+                                : "text-slate-900"
+                            }
+  `}
                         >
+                          {/* Task Number */}
+                          <span className="
+    text-xs font-bold px-2 py-0.5 rounded-md
+    bg-slate-200 text-slate-700
+    dark:bg-slate-800 dark:text-slate-300
+  ">
+                            #{idx + 1}
+                          </span>
+
+                          {/* Title */}
                           {task.title}
                         </h3>
                         <p
-                          className={`text-sm mt-1 ${isDark ? 'text-slate-400' : 'text-slate-600'
-                            }`}
+                          className={`
+                text-sm mt-2
+                ${isDark
+                              ? "text-slate-300"
+                              : "text-slate-600"
+                            }
+              `}
                         >
                           {task.description}
                         </p>
-                        <div className="flex items-center gap-3 mt-3 flex-wrap">
+
+                        <div className="flex items-center gap-3 mt-4 flex-wrap">
+                          {/* Status Badge */}
                           <span
-                            className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${task.status === 'completed'
-                              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                              : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                              }`}
+                            className={`
+                        inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold
+                          ${task.status === "completed"
+                                ? isDark
+                                  ? "bg-green-900/40 text-green-300"
+                                  : "bg-green-100 text-green-800"
+                                : isDark
+                                  ? "bg-orange-900/40 text-orange-300"
+                                  : "bg-orange-100 text-orange-800"
+                              }
+                                `}
                           >
-                            {task.status === 'completed' ? '✓ Completed' : '○ Pending'}
+                            {task.status === "completed" ? (
+                              <>
+                                ✓ Completed
+                              </>
+                            ) : (
+                              <>
+                                ⏳ Pending
+                              </>
+                            )}
                           </span>
+
+                          {/* Date */}
                           <span
-                            className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-500'
-                              }`}
+                            className={`
+                  text-xs font-medium
+                  ${isDark
+                                ? "text-slate-400"
+                                : "text-slate-500"
+                              }
+                `}
                           >
                             {new Date(task.createdAt).toLocaleDateString()}
                           </span>
@@ -489,22 +581,29 @@ export default function Dashboard() {
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => handleEditTask(task)}
-                        className={`p-2 rounded-lg transition-colors ${isDark
-                          ? 'hover:bg-slate-800 text-blue-400'
-                          : 'hover:bg-slate-100 text-blue-500'
-                          }`}
+                        className={`
+              p-2 rounded-lg transition-colors
+              ${isDark
+                            ? "hover:bg-slate-800 text-sky-400"
+                            : "hover:bg-slate-100 text-sky-600"
+                          }
+            `}
                         title="Edit task"
                       >
                         <AiOutlineEdit size={18} />
                       </motion.button>
+
                       <motion.button
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => handleDeleteTask(task._id)}
-                        className={`p-2 rounded-lg transition-colors ${isDark
-                          ? 'hover:bg-slate-800 text-red-400'
-                          : 'hover:bg-slate-100 text-red-500'
-                          }`}
+                        className={`
+              p-2 rounded-lg transition-colors
+              ${isDark
+                            ? "hover:bg-slate-800 text-rose-400"
+                            : "hover:bg-slate-100 text-rose-600"
+                          }
+            `}
                         title="Delete task"
                       >
                         <AiOutlineDelete size={18} />
