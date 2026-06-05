@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { BiLogoProductHunt } from 'react-icons/bi';
 import { useNavigate } from "react-router-dom";
+import { loginUser } from "../api/auth";
 // import Link from 'next/link';
 
 export default function Login() {
@@ -35,21 +36,34 @@ export default function Login() {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (validateForm()) {
-            setLoading(true);
-            console.log('Login attempt:', {
-                email,
-                password,
-                rememberMe
-            });
-            setTimeout(() => {
-                setLoading(false);
-                alert('Login successful! (Frontend only)');
-            }, 1500);
-        }
-    };
+    const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
+    setLoading(true);
+
+    try {
+        const res = await loginUser({
+            email,
+            password
+        });
+
+        console.log("Login success:", res);
+
+        alert("Login successful!");
+
+        // Redirect to dashboard
+        navigate("/dashboard");
+
+    } catch (error) {
+        console.log(error);
+
+        alert(error.message || "Login failed");
+    } finally {
+        setLoading(false);
+    }
+};
 
     const containerVariants = {
         hidden: { opacity: 0 },

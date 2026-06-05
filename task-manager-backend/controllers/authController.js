@@ -6,6 +6,9 @@ import generateToken from "../utils/generateToken.js";
  * @route POST /api/auth/register
  */
 export const registerUser = async (req, res) => {
+  //  console.log("REGISTER CONTROLLER HIT");
+  // console.log(req.body);
+  
   try {
     const { name, email, password } = req.body;
 

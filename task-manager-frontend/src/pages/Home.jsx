@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from "react-router-dom";
+import { getMe } from "../api/auth";
 import {
   FiCheckCircle,
   FiEdit3,
@@ -21,6 +22,7 @@ import {
 const Home = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navRef = useRef(null);
   const navigate = useNavigate();
 
@@ -39,6 +41,22 @@ const Home = () => {
       setIsMobileMenuOpen(false);
     }
   };
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const data = await getMe();
+
+        if (data?.success) {
+          setIsLoggedIn(true);
+        }
+      } catch (error) {
+        setIsLoggedIn(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -127,11 +145,10 @@ const Home = () => {
       {/* Navbar */}
       <motion.nav
         ref={navRef}
-        className={`fixed w-full top-0 z-40 transition-all duration-300 ${
-          isScrolled
-            ? 'bg-white/80 backdrop-blur-md shadow-lg'
-            : 'bg-transparent'
-        }`}
+        className={`fixed w-full top-0 z-40 transition-all duration-300 ${isScrolled
+          ? 'bg-white/80 backdrop-blur-md shadow-lg'
+          : 'bg-transparent'
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -160,15 +177,26 @@ const Home = () => {
               >
                 How It Works
               </button>
-              <motion.button
+              {/* <motion.button
                 onClick={() =>  navigate("/Login")}
                 className="px-4 py-2 rounded-lg border border-indigo-600 text-indigo-600 hover:bg-indigo-50 transition-colors font-medium"
                 whileHover={{ scale: 1.05 }}
               >
                 Login
-              </motion.button>
+              </motion.button> */}
+              {!isLoggedIn && (
+                <motion.button
+                  onClick={() => navigate("/Login")}
+                  className="px-4 py-2 rounded-lg border border-indigo-600 text-indigo-600 hover:bg-indigo-50 transition-colors font-medium"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  Login
+                </motion.button>
+              )}
               <motion.button
-                onClick={() => navigate("/Dashboard")}
+                onClick={() =>
+                  navigate(isLoggedIn ? "/Dashboard" : "/Register")
+                }
                 className="px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg transition-shadow font-medium"
                 whileHover={{ scale: 1.05 }}
               >
@@ -209,14 +237,24 @@ const Home = () => {
               >
                 How It Works
               </button>
-              <button
+              {/* <button
                 onClick={() => navigate("/Login")}
                 className="block w-full text-left px-4 py-2 text-indigo-600 font-medium"
               >
                 Login
-              </button>
+              </button> */}
+              {!isLoggedIn && (
+                <button
+                  onClick={() => navigate("/Login")}
+                  className="block w-full text-left px-4 py-2 text-indigo-600 font-medium"
+                >
+                  Login
+                </button>
+              )}
               <button
-                onClick={() => navigate("/Dashboard")}
+                onClick={() =>
+                  navigate(isLoggedIn ? "/Dashboard" : "/Register")
+                }
                 className="block w-full text-left px-4 py-2 text-indigo-600 font-medium"
               >
                 Get Started
@@ -269,6 +307,9 @@ const Home = () => {
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
                 <motion.button
+                  onClick={() =>
+                    navigate(isLoggedIn ? "/Dashboard" : "/Register")
+                  }
                   className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2 hover:shadow-lg"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -330,21 +371,19 @@ const Home = () => {
                         transition={{ delay: index * 0.1 }}
                       >
                         <div
-                          className={`w-4 h-4 rounded-full border-2 ${
-                            task.status === 'Completed'
-                              ? 'bg-green-500 border-green-500'
-                              : 'border-slate-300'
-                          }`}
+                          className={`w-4 h-4 rounded-full border-2 ${task.status === 'Completed'
+                            ? 'bg-green-500 border-green-500'
+                            : 'border-slate-300'
+                            }`}
                         />
                         <div className="flex-1">
                           <p className="text-sm font-medium text-slate-900">{task.title}</p>
                         </div>
                         <span
-                          className={`text-xs font-semibold px-2 py-1 rounded ${
-                            task.status === 'Completed'
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-yellow-100 text-yellow-700'
-                          }`}
+                          className={`text-xs font-semibold px-2 py-1 rounded ${task.status === 'Completed'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-yellow-100 text-yellow-700'
+                            }`}
                         >
                           {task.status}
                         </span>
@@ -567,11 +606,10 @@ const Home = () => {
                     viewport={{ once: true }}
                   >
                     <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        task.status === 'Completed'
-                          ? 'bg-green-500 border-green-500'
-                          : 'border-slate-300'
-                      }`}
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${task.status === 'Completed'
+                        ? 'bg-green-500 border-green-500'
+                        : 'border-slate-300'
+                        }`}
                     >
                       {task.status === 'Completed' && (
                         <FiCheckCircle className="w-3 h-3 text-white" />
@@ -581,11 +619,10 @@ const Home = () => {
                       <p className="font-medium text-slate-900">{task.title}</p>
                     </div>
                     <span
-                      className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                        task.status === 'Completed'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-yellow-100 text-yellow-700'
-                      }`}
+                      className={`text-xs font-semibold px-3 py-1 rounded-full ${task.status === 'Completed'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-yellow-100 text-yellow-700'
+                        }`}
                     >
                       {task.status}
                     </span>
@@ -648,19 +685,33 @@ const Home = () => {
               viewport={{ once: true }}
             >
               <motion.button
+                onClick={() =>
+                  navigate(isLoggedIn ? "/Dashboard" : "/Register")
+                }
                 className="px-8 py-4 bg-white text-indigo-600 rounded-lg font-bold flex items-center justify-center gap-2 hover:shadow-xl transition-shadow"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 Create Account <FiArrowRight className="w-5 h-5" />
               </motion.button>
-              <motion.button
+              {/* <motion.button
                 className="px-8 py-4 border-2 border-white text-white rounded-lg font-bold hover:bg-white/10 transition-colors"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 Sign In
-              </motion.button>
+              </motion.button> */}
+
+              {!isLoggedIn && (
+                <motion.button
+                  onClick={() => navigate("/Login")}
+                  className="px-8 py-4 border-2 border-white text-white rounded-lg font-bold hover:bg-white/10 transition-colors"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Sign In
+                </motion.button>
+              )}
             </motion.div>
           </motion.div>
         </div>
@@ -761,239 +812,3 @@ const Home = () => {
 };
 
 export default Home;
-
-
-
-
-
-
-
-
-
-// 'use client';
-
-// import { useState, useRef, useEffect } from 'react';
-// import { motion } from 'framer-motion';
-// import {
-//   FiCheckCircle,
-//   FiEdit3,
-//   FiTrash2,
-//   FiTrendingUp,
-//   FiLayout,
-//   FiSmartphone,
-//   FiMenu,
-//   FiX,
-//   FiArrowRight,
-//   FiGithub,
-//   FiLinkedin,
-//   FiTwitter,
-// } from 'react-icons/fi';
-
-// const Home = () => {
-//   const [isScrolled, setIsScrolled] = useState(false);
-//   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-//   const navRef = useRef(null);
-
-//   useEffect(() => {
-//     const handleScroll = () => setIsScrolled(window.scrollY > 50);
-//     window.addEventListener('scroll', handleScroll);
-//     return () => window.removeEventListener('scroll', handleScroll);
-//   }, []);
-
-//   const scrollToSection = (id) => {
-//     const el = document.getElementById(id);
-//     if (el) {
-//       el.scrollIntoView({ behavior: 'smooth' });
-//       setIsMobileMenuOpen(false);
-//     }
-//   };
-
-//   const fadeInUp = {
-//     initial: { opacity: 0, y: 20 },
-//     whileInView: { opacity: 1, y: 0 },
-//     transition: { duration: 0.5 },
-//     viewport: { once: true },
-//   };
-
-//   const staggerContainer = {
-//     initial: { opacity: 0 },
-//     whileInView: { opacity: 1 },
-//     transition: { staggerChildren: 0.1 },
-//     viewport: { once: true },
-//   };
-
-//   const staggerItem = {
-//     initial: { opacity: 0, y: 20 },
-//     whileInView: { opacity: 1, y: 0 },
-//     transition: { duration: 0.5 },
-//   };
-
-//   const floatingAnimation = {
-//     animate: { y: [0, -10, 0] },
-//     transition: { duration: 3, repeat: Infinity },
-//   };
-
-//   const features = [
-//     { icon: <FiCheckCircle />, title: 'Create Tasks', description: 'Easily add new tasks' },
-//     { icon: <FiEdit3 />, title: 'Edit Tasks', description: 'Update task details' },
-//     { icon: <FiTrash2 />, title: 'Delete Tasks', description: 'Remove tasks easily' },
-//     { icon: <FiTrendingUp />, title: 'Task Tracking', description: 'Monitor progress' },
-//     { icon: <FiLayout />, title: 'Smart Organization', description: 'Organize tasks' },
-//     { icon: <FiSmartphone />, title: 'Responsive Design', description: 'Works on all devices' },
-//   ];
-
-//   const steps = [
-//     { number: '01', title: 'Create Account', description: 'Sign up quickly' },
-//     { number: '02', title: 'Add Tasks', description: 'Organize work' },
-//     { number: '03', title: 'Track Progress', description: 'Stay productive' },
-//   ];
-
-//   const tasks = [
-//     { title: 'Build Login Page', status: 'Completed' },
-//     { title: 'Connect Backend', status: 'Pending' },
-//     { title: 'Deploy Project', status: 'Pending' },
-//   ];
-
-//   // ✅ FIX: Safe color mapping (IMPORTANT FOR TAILWIND)
-//   const statStyles = {
-//     indigo: {
-//       bg: 'bg-indigo-50',
-//       text: 'text-indigo-600',
-//     },
-//     green: {
-//       bg: 'bg-green-50',
-//       text: 'text-green-600',
-//     },
-//     yellow: {
-//       bg: 'bg-yellow-50',
-//       text: 'text-yellow-600',
-//     },
-//     purple: {
-//       bg: 'bg-purple-50',
-//       text: 'text-purple-600',
-//     },
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
-
-//       {/* NAVBAR */}
-//       <motion.nav
-//         ref={navRef}
-//         className={`fixed w-full top-0 z-40 transition ${
-//           isScrolled ? 'bg-white/80 backdrop-blur shadow' : 'bg-transparent'
-//         }`}
-//       >
-//         <div className="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
-
-//           <div className="flex items-center gap-2 font-bold text-xl">
-//             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
-//               T
-//             </div>
-//             TaskFlow
-//           </div>
-
-//           <div className="hidden md:flex gap-6">
-//             <button onClick={() => scrollToSection('features')}>Features</button>
-//             <button onClick={() => scrollToSection('how-it-works')}>How it works</button>
-//             <button className="text-indigo-600">Login</button>
-//           </div>
-
-//           <button
-//             className="md:hidden"
-//             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-//           >
-//             {isMobileMenuOpen ? <FiX /> : <FiMenu />}
-//           </button>
-//         </div>
-
-//         {isMobileMenuOpen && (
-//           <div className="md:hidden bg-white p-4 space-y-2">
-//             <button onClick={() => scrollToSection('features')}>Features</button>
-//             <button onClick={() => scrollToSection('how-it-works')}>How it works</button>
-//             <button>Login</button>
-//           </div>
-//         )}
-//       </motion.nav>
-
-//       {/* HERO */}
-//       <section className="pt-32 px-6 grid md:grid-cols-2 gap-10 max-w-7xl mx-auto">
-
-//         <div {...fadeInUp}>
-//           <h1 className="text-5xl font-bold">
-//             Manage Tasks Smarter
-//           </h1>
-//           <p className="mt-4 text-gray-600">
-//             Organize and track your productivity easily.
-//           </p>
-
-//           <div className="mt-6 flex gap-4">
-//             <button className="bg-indigo-600 text-white px-6 py-3 rounded-lg">
-//               Get Started <FiArrowRight className="inline ml-2" />
-//             </button>
-//             <button className="border px-6 py-3 rounded-lg">
-//               Explore
-//             </button>
-//           </div>
-//         </div>
-
-//       </section>
-
-//       {/* FEATURES */}
-//       <section id="features" className="py-20 max-w-7xl mx-auto px-6">
-
-//         <h2 className="text-3xl font-bold text-center mb-10">
-//           Features
-//         </h2>
-
-//         <div className="grid md:grid-cols-3 gap-6">
-//           {features.map((f, i) => (
-//             <div key={i} className="p-6 bg-white shadow rounded-xl">
-//               <div className="text-indigo-600 text-xl mb-2">{f.icon}</div>
-//               <h3 className="font-bold">{f.title}</h3>
-//               <p className="text-gray-500">{f.description}</p>
-//             </div>
-//           ))}
-//         </div>
-//       </section>
-
-//       {/* DASHBOARD STATS FIXED */}
-//       <section className="py-20 px-6 max-w-6xl mx-auto">
-
-//         <div className="grid md:grid-cols-4 gap-4">
-//           {[
-//             { label: 'Total Tasks', value: '5', color: 'indigo' },
-//             { label: 'Completed', value: '2', color: 'green' },
-//             { label: 'Pending', value: '3', color: 'yellow' },
-//             { label: 'Success Rate', value: '40%', color: 'purple' },
-//           ].map((s, i) => (
-//             <div
-//               key={i}
-//               className={`${statStyles[s.color].bg} p-6 rounded-xl`}
-//             >
-//               <p className="text-gray-600">{s.label}</p>
-//               <p className={`text-2xl font-bold ${statStyles[s.color].text}`}>
-//                 {s.value}
-//               </p>
-//             </div>
-//           ))}
-//         </div>
-//       </section>
-
-//       {/* TASKS */}
-//       <section className="max-w-3xl mx-auto px-6 py-10">
-//         {tasks.map((t, i) => (
-//           <div key={i} className="flex justify-between p-4 bg-white shadow rounded-lg mb-3">
-//             <span>{t.title}</span>
-//             <span className={t.status === 'Completed' ? 'text-green-600' : 'text-yellow-600'}>
-//               {t.status}
-//             </span>
-//           </div>
-//         ))}
-//       </section>
-
-//     </div>
-//   );
-// };
-
-// export default Home;

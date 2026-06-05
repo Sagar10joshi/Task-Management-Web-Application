@@ -6,6 +6,7 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { BiLogoProductHunt } from 'react-icons/bi';
 import { BsCheckCircleFill, BsXCircleFill } from 'react-icons/bs';
 import { useNavigate } from "react-router-dom";
+import { registerUser } from "../api/auth"; // adjust path if needed
 // import Link from 'next/link';
 
 export default function Register() {
@@ -24,7 +25,7 @@ export default function Register() {
   const getPasswordStrength = () => {
     const pwd = formData.password;
     if (!pwd) return { score: 0, label: '', color: '' };
-    
+
     let score = 0;
     if (pwd.length >= 6) score++;
     if (pwd.length >= 10) score++;
@@ -81,17 +82,38 @@ export default function Register() {
     }
   };
 
-  const handleSubmit = (e) => {
+
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      setLoading(true);
-      console.log('Registration attempt:', formData);
-      setTimeout(() => {
-        setLoading(false);
-        alert('Registration successful! (Frontend only)');
-      }, 1500);
+
+    if (!validateForm()) return;
+
+    setLoading(true);
+
+    try {
+      const res = await registerUser({
+        name: formData.fullName,
+        email: formData.email,
+        password: formData.password
+      });
+
+      console.log("User registered:", res);
+
+      alert("Account created successfully!");
+
+      navigate("/login");
+
+    } catch (error) {
+      console.log(error);
+
+      alert(error.message || "Registration failed");
+    } 
+    finally {
+      setLoading(false);
     }
   };
+
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -169,11 +191,10 @@ export default function Register() {
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 rounded-lg border-2 transition-colors focus:outline-none ${
-                  errors.fullName
+                className={`w-full px-4 py-3 rounded-lg border-2 transition-colors focus:outline-none ${errors.fullName
                     ? 'border-red-500 bg-red-50 focus:border-red-600'
                     : 'border-slate-200 bg-slate-50 focus:border-purple-500 focus:bg-white'
-                }`}
+                  }`}
                 placeholder="John Doe"
               />
               {errors.fullName && (
@@ -196,11 +217,10 @@ export default function Register() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 rounded-lg border-2 transition-colors focus:outline-none ${
-                  errors.email
+                className={`w-full px-4 py-3 rounded-lg border-2 transition-colors focus:outline-none ${errors.email
                     ? 'border-red-500 bg-red-50 focus:border-red-600'
                     : 'border-slate-200 bg-slate-50 focus:border-purple-500 focus:bg-white'
-                }`}
+                  }`}
                 placeholder="you@example.com"
               />
               {errors.email && (
@@ -224,11 +244,10 @@ export default function Register() {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 rounded-lg border-2 transition-colors focus:outline-none pr-10 ${
-                    errors.password
+                  className={`w-full px-4 py-3 rounded-lg border-2 transition-colors focus:outline-none pr-10 ${errors.password
                       ? 'border-red-500 bg-red-50 focus:border-red-600'
                       : 'border-slate-200 bg-slate-50 focus:border-purple-500 focus:bg-white'
-                  }`}
+                    }`}
                   placeholder="••••••••"
                 />
                 <button
@@ -255,17 +274,16 @@ export default function Register() {
                       Password Strength
                     </span>
                     <span
-                      className={`text-xs font-bold ${
-                        strengthScore.score === 1
+                      className={`text-xs font-bold ${strengthScore.score === 1
                           ? 'text-red-500'
                           : strengthScore.score === 2
-                          ? 'text-yellow-500'
-                          : strengthScore.score === 3
-                          ? 'text-blue-500'
-                          : strengthScore.score >= 4
-                          ? 'text-green-500'
-                          : ''
-                      }`}
+                            ? 'text-yellow-500'
+                            : strengthScore.score === 3
+                              ? 'text-blue-500'
+                              : strengthScore.score >= 4
+                                ? 'text-green-500'
+                                : ''
+                        }`}
                     >
                       {strengthScore.label}
                     </span>
@@ -300,14 +318,13 @@ export default function Register() {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 rounded-lg border-2 transition-colors focus:outline-none pr-10 ${
-                    errors.confirmPassword
+                  className={`w-full px-4 py-3 rounded-lg border-2 transition-colors focus:outline-none pr-10 ${errors.confirmPassword
                       ? 'border-red-500 bg-red-50 focus:border-red-600'
                       : formData.confirmPassword &&
                         formData.password === formData.confirmPassword
-                      ? 'border-green-500 bg-green-50 focus:border-green-600'
-                      : 'border-slate-200 bg-slate-50 focus:border-purple-500 focus:bg-white'
-                  }`}
+                        ? 'border-green-500 bg-green-50 focus:border-green-600'
+                        : 'border-slate-200 bg-slate-50 focus:border-purple-500 focus:bg-white'
+                    }`}
                   placeholder="••••••••"
                 />
                 <button

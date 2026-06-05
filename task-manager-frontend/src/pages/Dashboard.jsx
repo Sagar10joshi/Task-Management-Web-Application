@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   AiOutlineLogout,
@@ -12,47 +12,27 @@ import {
 import { BsCheckCircle, BsCircle, BsMoon, BsSun } from 'react-icons/bs';
 import { BiLogoProductHunt } from 'react-icons/bi';
 import { MdCheckCircle } from 'react-icons/md';
+import {
+  getTasks,
+  createTask,
+  updateTask,
+  deleteTask,
+  toggleTaskStatus
+} from "../api/task";
 
-const initialTasks = [
-  {
-    id: 1,
-    title: 'Build Dashboard UI',
-    description: 'Create dashboard components with React',
-    status: 'completed',
-    createdAt: '2024-06-01'
-  },
-  {
-    id: 2,
-    title: 'Connect Backend API',
-    description: 'Integrate REST API endpoints',
-    status: 'pending',
-    createdAt: '2024-06-02'
-  },
-  {
-    id: 3,
-    title: 'Setup Authentication',
-    description: 'Implement user authentication system',
-    status: 'pending',
-    createdAt: '2024-06-03'
-  },
-  {
-    id: 4,
-    title: 'Database Design',
-    description: 'Design and create database schema',
-    status: 'completed',
-    createdAt: '2024-05-28'
-  },
-  {
-    id: 5,
-    title: 'Add Task Notifications',
-    description: 'Implement email notifications for tasks',
-    status: 'pending',
-    createdAt: '2024-06-04'
-  }
-];
+import {
+  getMe,
+  logoutUser
+} from "../api/auth";
+
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
-  const [tasks, setTasks] = useState(initialTasks);
+  const [tasks, setTasks] = useState([]);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
   const [isDark, setIsDark] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -60,6 +40,11 @@ export default function Dashboard() {
   const [editingTask, setEditingTask] = useState(null);
   const [newTask, setNewTask] = useState({ title: '', description: '' });
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    fetchUser();
+    fetchTasks();
+  }, []);
 
   // Filter and search tasks
   const filteredTasks = useMemo(() => {
@@ -84,6 +69,31 @@ export default function Dashboard() {
     return { total, completed, pending, completionRate };
   }, [tasks]);
 
+
+  const fetchUser = async () => {
+    try {
+      const data = await getMe();
+      setUser(data.user);
+    } catch (error) {
+      navigate("/login");
+    }
+  };
+
+
+  const fetchTasks = async () => {
+    try {
+      setLoading(true);
+
+      const data = await getTasks();
+
+      setTasks(data.tasks);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const validateTask = () => {
     const newErrors = {};
     if (!newTask.title.trim()) {
@@ -96,30 +106,43 @@ export default function Dashboard() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleAddTask = () => {
-    if (validateTask()) {
+  const handleAddTask = async () => {
+    if (!validateTask()) return;
+
+    try {
       if (editingTask) {
-        setTasks(
-          tasks.map(t =>
-            t.id === editingTask.id
-              ? { ...t, title: newTask.title, description: newTask.description }
-              : t
-          )
+        const data = await updateTask(
+          editingTask._id,
+          {
+            title: newTask.title,
+            description: newTask.description
+          }
         );
-        setEditingTask(null);
+
+        setTasks(tasks.map(task =>
+          task._id === editingTask._id
+            ? data.task
+            : task
+        ));
       } else {
-        const task = {
-          id: Math.max(...tasks.map(t => t.id), 0) + 1,
+        const data = await createTask({
           title: newTask.title,
-          description: newTask.description,
-          status: 'pending',
-          createdAt: new Date().toISOString().split('T')[0]
-        };
-        setTasks([task, ...tasks]);
+          description: newTask.description
+        });
+
+        setTasks([data.task, ...tasks]);
       }
-      setNewTask({ title: '', description: '' });
-      setErrors({});
+
       setShowModal(false);
+      setEditingTask(null);
+
+      setNewTask({
+        title: "",
+        description: ""
+      });
+
+    } catch (error) {
+      alert(error.message);
     }
   };
 
@@ -130,18 +153,41 @@ export default function Dashboard() {
     setErrors({});
   };
 
-  const handleDeleteTask = (id) => {
-    setTasks(tasks.filter(t => t.id !== id));
+  const handleDeleteTask = async (id) => {
+    try {
+      await deleteTask(id);
+
+      setTasks(
+        tasks.filter(task => task._id !== id)
+      );
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
-  const handleToggleStatus = (id) => {
-    setTasks(
-      tasks.map(t =>
-        t.id === id
-          ? { ...t, status: t.status === 'pending' ? 'completed' : 'pending' }
-          : t
-      )
-    );
+  const handleToggleStatus = async (id) => {
+    try {
+      const data =
+        await toggleTaskStatus(id);
+
+      setTasks(tasks.map(task =>
+        task._id === id
+          ? data.task
+          : task
+      ));
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+
+      navigate("/login");
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   const handleCloseModal = () => {
@@ -159,6 +205,14 @@ export default function Dashboard() {
   const inputClass = isDark
     ? 'bg-slate-800 border-slate-700 text-white'
     : 'bg-white border-slate-200 text-slate-900';
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -194,11 +248,10 @@ export default function Dashboard() {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsDark(!isDark)}
-                className={`p-2 rounded-lg transition-colors ${
-                  isDark
-                    ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
+                className={`p-2 rounded-lg transition-colors ${isDark
+                  ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
                 title={isDark ? 'Light mode' : 'Dark mode'}
               >
                 {isDark ? <BsSun size={20} /> : <BsMoon size={20} />}
@@ -207,15 +260,16 @@ export default function Dashboard() {
               {/* User Section */}
               <div className="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
-                  JD
+                  {user?.name?.charAt(0)?.toUpperCase()}
                 </div>
                 <div className="hidden sm:block">
-                  <p className="text-sm font-semibold">John Doe</p>
+                  <p className="text-sm font-semibold">{user?.name}</p>
                   <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                    user@example.com
+                    {user?.email}
                   </p>
                 </div>
                 <motion.button
+                  onClick={handleLogout}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                   className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-red-500 transition-colors"
@@ -306,11 +360,10 @@ export default function Dashboard() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Search tasks..."
-                  className={`w-full pl-10 pr-4 py-2 rounded-lg border-2 transition-colors focus:outline-none ${
-                    isDark
-                      ? 'border-slate-600 bg-slate-800 text-white focus:border-indigo-500'
-                      : 'border-slate-200 bg-white focus:border-indigo-500'
-                  }`}
+                  className={`w-full pl-10 pr-4 py-2 rounded-lg border-2 transition-colors focus:outline-none ${isDark
+                    ? 'border-slate-600 bg-slate-800 text-white focus:border-indigo-500'
+                    : 'border-slate-200 bg-white focus:border-indigo-500'
+                    }`}
                 />
               </div>
             </div>
@@ -321,11 +374,10 @@ export default function Dashboard() {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className={`w-full px-4 py-2 rounded-lg border-2 transition-colors focus:outline-none ${
-                  isDark
-                    ? 'border-slate-600 bg-slate-800 text-white focus:border-indigo-500'
-                    : 'border-slate-200 bg-white focus:border-indigo-500'
-                }`}
+                className={`w-full px-4 py-2 rounded-lg border-2 transition-colors focus:outline-none ${isDark
+                  ? 'border-slate-600 bg-slate-800 text-white focus:border-indigo-500'
+                  : 'border-slate-200 bg-white focus:border-indigo-500'
+                  }`}
               >
                 <option value="all">All Tasks</option>
                 <option value="completed">Completed</option>
@@ -369,7 +421,7 @@ export default function Dashboard() {
             <AnimatePresence>
               {filteredTasks.map((task, idx) => (
                 <motion.div
-                  key={task.id}
+                  key={task._id}
                   className={`${cardClass} rounded-xl p-6 border shadow-sm`}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -382,55 +434,50 @@ export default function Dashboard() {
                       <motion.button
                         whileHover={{ scale: 1.2 }}
                         whileTap={{ scale: 0.9 }}
-                        onClick={() => handleToggleStatus(task.id)}
+                        onClick={() => handleToggleStatus(task._id)}
                         className="flex-shrink-0 mt-1 text-2xl focus:outline-none"
                       >
                         {task.status === 'completed' ? (
                           <MdCheckCircle className="text-green-500" />
                         ) : (
                           <BsCircle
-                            className={`${
-                              isDark
-                                ? 'text-slate-600'
-                                : 'text-slate-300'
-                            }`}
+                            className={`${isDark
+                              ? 'text-slate-600'
+                              : 'text-slate-300'
+                              }`}
                           />
                         )}
                       </motion.button>
 
                       <div className="flex-1">
                         <h3
-                          className={`text-lg font-semibold ${
-                            task.status === 'completed'
-                              ? 'line-through ' + (isDark ? 'text-slate-500' : 'text-slate-400')
-                              : ''
-                          }`}
+                          className={`text-lg font-semibold ${task.status === 'completed'
+                            ? 'line-through ' + (isDark ? 'text-slate-500' : 'text-slate-400')
+                            : ''
+                            }`}
                         >
                           {task.title}
                         </h3>
                         <p
-                          className={`text-sm mt-1 ${
-                            isDark ? 'text-slate-400' : 'text-slate-600'
-                          }`}
+                          className={`text-sm mt-1 ${isDark ? 'text-slate-400' : 'text-slate-600'
+                            }`}
                         >
                           {task.description}
                         </p>
                         <div className="flex items-center gap-3 mt-3 flex-wrap">
                           <span
-                            className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                              task.status === 'completed'
-                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                            }`}
+                            className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${task.status === 'completed'
+                              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                              : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                              }`}
                           >
                             {task.status === 'completed' ? '✓ Completed' : '○ Pending'}
                           </span>
                           <span
-                            className={`text-xs ${
-                              isDark ? 'text-slate-500' : 'text-slate-500'
-                            }`}
+                            className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-500'
+                              }`}
                           >
-                            {task.createdAt}
+                            {new Date(task.createdAt).toLocaleDateString()}
                           </span>
                         </div>
                       </div>
@@ -442,11 +489,10 @@ export default function Dashboard() {
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => handleEditTask(task)}
-                        className={`p-2 rounded-lg transition-colors ${
-                          isDark
-                            ? 'hover:bg-slate-800 text-blue-400'
-                            : 'hover:bg-slate-100 text-blue-500'
-                        }`}
+                        className={`p-2 rounded-lg transition-colors ${isDark
+                          ? 'hover:bg-slate-800 text-blue-400'
+                          : 'hover:bg-slate-100 text-blue-500'
+                          }`}
                         title="Edit task"
                       >
                         <AiOutlineEdit size={18} />
@@ -454,12 +500,11 @@ export default function Dashboard() {
                       <motion.button
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => handleDeleteTask(task.id)}
-                        className={`p-2 rounded-lg transition-colors ${
-                          isDark
-                            ? 'hover:bg-slate-800 text-red-400'
-                            : 'hover:bg-slate-100 text-red-500'
-                        }`}
+                        onClick={() => handleDeleteTask(task._id)}
+                        className={`p-2 rounded-lg transition-colors ${isDark
+                          ? 'hover:bg-slate-800 text-red-400'
+                          : 'hover:bg-slate-100 text-red-500'
+                          }`}
                         title="Delete task"
                       >
                         <AiOutlineDelete size={18} />
@@ -540,11 +585,10 @@ export default function Dashboard() {
                         setNewTask({ ...newTask, title: e.target.value });
                         if (errors.title) setErrors({ ...errors, title: '' });
                       }}
-                      className={`w-full px-4 py-2 rounded-lg border-2 transition-colors focus:outline-none ${
-                        errors.title
-                          ? `border-red-500 ${isDark ? 'bg-red-900/20' : 'bg-red-50'}`
-                          : `border-slate-200 ${isDark ? 'bg-slate-800 text-white border-slate-600' : 'bg-white'}`
-                      }`}
+                      className={`w-full px-4 py-2 rounded-lg border-2 transition-colors focus:outline-none ${errors.title
+                        ? `border-red-500 ${isDark ? 'bg-red-900/20' : 'bg-red-50'}`
+                        : `border-slate-200 ${isDark ? 'bg-slate-800 text-white border-slate-600' : 'bg-white'}`
+                        }`}
                       placeholder="Enter task title"
                     />
                     {errors.title && (
@@ -570,11 +614,10 @@ export default function Dashboard() {
                           setErrors({ ...errors, description: '' });
                       }}
                       rows="4"
-                      className={`w-full px-4 py-2 rounded-lg border-2 transition-colors focus:outline-none resize-none ${
-                        errors.description
-                          ? `border-red-500 ${isDark ? 'bg-red-900/20' : 'bg-red-50'}`
-                          : `border-slate-200 ${isDark ? 'bg-slate-800 text-white border-slate-600' : 'bg-white'}`
-                      }`}
+                      className={`w-full px-4 py-2 rounded-lg border-2 transition-colors focus:outline-none resize-none ${errors.description
+                        ? `border-red-500 ${isDark ? 'bg-red-900/20' : 'bg-red-50'}`
+                        : `border-slate-200 ${isDark ? 'bg-slate-800 text-white border-slate-600' : 'bg-white'}`
+                        }`}
                       placeholder="Enter task description"
                     />
                     {errors.description && (
@@ -590,11 +633,10 @@ export default function Dashboard() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleCloseModal}
-                    className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-colors ${
-                      isDark
-                        ? 'bg-slate-800 text-white hover:bg-slate-700'
-                        : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
-                    }`}
+                    className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-colors ${isDark
+                      ? 'bg-slate-800 text-white hover:bg-slate-700'
+                      : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
+                      }`}
                   >
                     Cancel
                   </motion.button>
