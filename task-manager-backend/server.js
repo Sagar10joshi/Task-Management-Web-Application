@@ -23,8 +23,10 @@ dbConnect();
 // 1. CORS FIRST (VERY IMPORTANT)
 app.use(
   cors({
-    // origin: "http://localhost:5173", //during development
-    origin: "https://task-management-web-application-delta.vercel.app",  //in production or deployment in vercel
+    origin: [
+      "http://localhost:5173",
+      "https://task-management-web-application-delta.vercel.app"
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"]
@@ -51,7 +53,7 @@ app.get("/whoami", (req, res) => {
   });
 });
 
-console.log("SERVER STARTED");
+// console.log("SERVER STARTED");
 
 /* ---------------- ROUTES ---------------- */
 app.use("/api/auth", authRoutes);
@@ -63,6 +65,12 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+export default app;// Export the app instance
+
+
+
+
+//Only in development
+// app.listen(PORT, () => {
+//   console.log(`Server running on port ${PORT}`);
+// });
