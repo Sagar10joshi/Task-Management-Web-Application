@@ -1,4 +1,4 @@
-const BASE_URL = "https://task-management-web-application-j1u.vercel.app/api";
+const BASE_URL = "https://task-management-web-application-xpxz.onrender.com/api";
 
 /**
  * REGISTER USER
