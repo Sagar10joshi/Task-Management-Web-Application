@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = "https://task-management-web-application-j1u.vercel.app/api";
 
 /**
  * REGISTER USER
@@ -7,7 +7,7 @@ export const registerUser = async (userData) => {
   //  console.log("REGISTER CONTROLLER HIT");
   // console.log(req.body);
   // const res = await fetch(`${BASE_URL}/auth/register`, {
-    const res = await fetch(`http://localhost:5000/api/auth/register`, {
+    const res = await fetch(`${BASE_URL}/auth/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -25,27 +25,7 @@ export const registerUser = async (userData) => {
   return data;
 };
 
-// /**
-//  * LOGIN USER (for later)
-//  */
-// export const loginUser = async (userData) => {
-//   const res = await fetch(`${BASE_URL}/auth/login`, {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json"
-//     },
-//     credentials: "include",
-//     body: JSON.stringify(userData)
-//   });
 
-//   const data = await res.json();
-
-//   if (!res.ok) {
-//     throw new Error(data.message || "Login failed");
-//   }
-
-//   return data;
-// };
 
 /**
  * GET CURRENT USER
@@ -84,13 +64,6 @@ export const logoutUser = async () => {
 };
 
 
-
-
-
-
-
-
-// const BASE_URL = "http://localhost:5000/api";
 
 /**
  * LOGIN USER

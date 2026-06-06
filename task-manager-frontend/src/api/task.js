@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:5000/api/tasks";
+const BASE_URL = "https://task-management-web-application-j1u.vercel.app/api/tasks";
 
 export const getTasks = async () => {
   const res = await fetch(BASE_URL, {
