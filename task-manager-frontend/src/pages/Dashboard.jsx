@@ -52,7 +52,7 @@ export default function Dashboard() {
     try {
       await getMe();
     } catch (err) {
-      navigate("/Login");
+      navigate("/Dashboard");
     }
   };
 
@@ -217,7 +217,7 @@ export default function Dashboard() {
     try {
       await logoutUser();
 
-      navigate("/login");
+      navigate("/Dashboard");
     } catch (error) {
       alert(error.message);
     }

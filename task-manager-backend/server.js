@@ -65,12 +65,12 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-export default app;// Export the app instance
+// export default app;// Export the app instance
 
 
 
 
 //Only in development
-// app.listen(PORT, () => {
-//   console.log(`Server running on port ${PORT}`);
-// });
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
