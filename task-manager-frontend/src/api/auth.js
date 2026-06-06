@@ -4,9 +4,7 @@ const BASE_URL = "https://task-management-web-application-j1u.vercel.app/api";
  * REGISTER USER
  */
 export const registerUser = async (userData) => {
-  //  console.log("REGISTER CONTROLLER HIT");
-  // console.log(req.body);
-  // const res = await fetch(`${BASE_URL}/auth/register`, {
+  
     const res = await fetch(`${BASE_URL}/auth/register`, {
     method: "POST",
     headers: {

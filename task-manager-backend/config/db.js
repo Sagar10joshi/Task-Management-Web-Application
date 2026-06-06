@@ -11,11 +11,8 @@ const dbConnect = async () => {
     try {
 
         const connectionId = await mongoose.connect(
-            process.env.MONGODB_URL,
-            {
-                dbName: "Task_Manager"
-            }
-        );
+            `${process.env.MONGODB_URL}/Task_Manager`
+        )
         console.log(`Database Connected Successfully :${connectionId.connection.host}`);
 
         app.on("error", (error) => {
