@@ -32,6 +32,7 @@ export default function Dashboard() {
   const [tasks, setTasks] = useState([]);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [viewTask, setViewTask] = useState(null);
 
   const navigate = useNavigate();
   const [isDark, setIsDark] = useState(false);
@@ -48,16 +49,24 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-  const checkAuth = async () => {
-    try {
-      await getMe();
-    } catch (err) {
-      navigate("/");
-    }
+    const checkAuth = async () => {
+      try {
+        await getMe();
+      } catch (err) {
+        navigate("/");
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  const handleViewTask = (task) => {
+    setViewTask(task);
   };
 
-  checkAuth();
-}, []);
+  const handleCloseViewModal = () => {
+    setViewTask(null);
+  };
 
   // Filter and search tasks
   // const filteredTasks = useMemo(() => {
@@ -72,24 +81,24 @@ export default function Dashboard() {
   // }, [tasks, searchTerm, filterStatus]);
 
   const filteredTasks = useMemo(() => {
-  return tasks
-    .filter(task => {
-      const matchesSearch = task.title
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
+    return tasks
+      .filter(task => {
+        const matchesSearch = task.title
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
 
-      const matchesFilter =
-        filterStatus === 'all' || task.status === filterStatus;
+        const matchesFilter =
+          filterStatus === 'all' || task.status === filterStatus;
 
-      return matchesSearch && matchesFilter;
-    })
-    .sort((a, b) => {
-      // pending first, completed last
-      if (a.status === b.status) return 0;
-      if (a.status === 'pending') return -1;
-      return 1;
-    });
-}, [tasks, searchTerm, filterStatus]);
+        return matchesSearch && matchesFilter;
+      })
+      .sort((a, b) => {
+        // pending first, completed last
+        if (a.status === b.status) return 0;
+        if (a.status === 'pending') return -1;
+        return 1;
+      });
+  }, [tasks, searchTerm, filterStatus]);
 
   // Statistics
   const statistics = useMemo(() => {
@@ -242,70 +251,65 @@ export default function Dashboard() {
     : 'bg-white border-slate-200 text-slate-900';
 
 
-    function DashboardSkeleton({ isDark }) {
-  return (
-    <div
-      className={`min-h-screen ${
-        isDark ? "bg-slate-950" : "bg-slate-50"
-      } animate-pulse`}
-    >
-      {/* Navbar */}
+  function DashboardSkeleton({ isDark }) {
+    return (
       <div
-        className={`h-20 border-b ${
-          isDark
+        className={`min-h-screen ${isDark ? "bg-slate-950" : "bg-slate-50"
+          } animate-pulse`}
+      >
+        {/* Navbar */}
+        <div
+          className={`h-20 border-b ${isDark
             ? "bg-slate-900 border-slate-700"
             : "bg-white border-slate-200"
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
-          <div className="h-8 w-40 rounded bg-slate-300 dark:bg-slate-700" />
-          <div className="flex gap-3">
-            <div className="h-10 w-10 rounded-full bg-slate-300 dark:bg-slate-700" />
-            <div className="h-10 w-28 rounded bg-slate-300 dark:bg-slate-700" />
+            }`}
+        >
+          <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
+            <div className="h-8 w-40 rounded bg-slate-300 dark:bg-slate-700" />
+            <div className="flex gap-3">
+              <div className="h-10 w-10 rounded-full bg-slate-300 dark:bg-slate-700" />
+              <div className="h-10 w-28 rounded bg-slate-300 dark:bg-slate-700" />
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto p-6">
+          {/* Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            {[...Array(4)].map((_, i) => (
+              <div
+                key={i}
+                className={`h-32 rounded-xl ${isDark ? "bg-slate-900" : "bg-white"
+                  }`}
+              />
+            ))}
+          </div>
+
+          {/* Search */}
+          <div
+            className={`h-24 rounded-xl mb-8 ${isDark ? "bg-slate-900" : "bg-white"
+              }`}
+          />
+
+          {/* Tasks */}
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={i}
+                className={`h-28 rounded-xl ${isDark ? "bg-slate-900" : "bg-white"
+                  }`}
+              />
+            ))}
           </div>
         </div>
       </div>
-
-      <div className="max-w-7xl mx-auto p-6">
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          {[...Array(4)].map((_, i) => (
-            <div
-              key={i}
-              className={`h-32 rounded-xl ${
-                isDark ? "bg-slate-900" : "bg-white"
-              }`}
-            />
-          ))}
-        </div>
-
-        {/* Search */}
-        <div
-          className={`h-24 rounded-xl mb-8 ${
-            isDark ? "bg-slate-900" : "bg-white"
-          }`}
-        />
-
-        {/* Tasks */}
-        <div className="space-y-4">
-          {[...Array(5)].map((_, i) => (
-            <div
-              key={i}
-              className={`h-28 rounded-xl ${
-                isDark ? "bg-slate-900" : "bg-white"
-              }`}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
+    );
+  }
 
 
   if (loading) {
-  return <DashboardSkeleton isDark={isDark} />;
-}
+    return <DashboardSkeleton isDark={isDark} />;
+  }
 
   return (
     <motion.div
@@ -539,24 +543,31 @@ export default function Dashboard() {
                   whileHover={{ y: -2 }}
                 >
                   <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 flex gap-4">
+                    <div className="flex-1 flex gap-4 cursor-pointer"
+                    // onClick={() => handleViewTask(task)}
+                    >
+
                       {/* Square Toggle */}
                       <motion.button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleStatus(task._id);
+                        }}
                         whileHover={{ scale: 1.08 }}
                         whileTap={{ scale: 0.9 }}
-                        onClick={() => handleToggleStatus(task._id)}
+                        // onClick={() => handleToggleStatus(task._id)}
                         className="flex-shrink-0 mt-1 focus:outline-none"
                       >
                         <div
                           className={`
-                w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all
-                ${task.status === "completed"
+                        w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all
+                          ${task.status === "completed"
                               ? "bg-green-500 border-green-500"
                               : isDark
                                 ? "border-slate-500 bg-slate-800"
                                 : "border-slate-400 bg-white"
                             }
-              `}
+                        `}
                         >
                           {task.status === "completed" && (
                             <MdCheck
@@ -570,7 +581,7 @@ export default function Dashboard() {
                       <div className="flex-1">
                         <h3
                           className={`
-    text-lg font-semibold transition-all flex items-center gap-2
+    text-lg font-semibold transition-all flex items-center gap-2 cursor-pointer
     ${task.status === "completed"
                               ? isDark
                                 ? "line-through text-slate-400"
@@ -580,8 +591,9 @@ export default function Dashboard() {
                                 : "text-slate-900"
                             }
   `}
+                          onClick={() => handleViewTask(task)}
+                          title="Click to view details"
                         >
-                          {/* Task Number */}
                           <span className="
     text-xs font-bold px-2 py-0.5 rounded-md
     bg-slate-200 text-slate-700
@@ -590,10 +602,9 @@ export default function Dashboard() {
                             #{idx + 1}
                           </span>
 
-                          {/* Title */}
                           {task.title}
                         </h3>
-                        <p
+                        {/* <p
                           className={`
                 text-sm mt-2
                 ${isDark
@@ -603,9 +614,10 @@ export default function Dashboard() {
               `}
                         >
                           {task.description}
-                        </p>
+                        </p> */}
 
                         <div className="flex items-center gap-3 mt-4 flex-wrap">
+
                           {/* Status Badge */}
                           <span
                             className={`
@@ -650,9 +662,13 @@ export default function Dashboard() {
                     {/* Actions */}
                     <div className="flex gap-2 flex-shrink-0">
                       <motion.button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditTask(task);
+                        }}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => handleEditTask(task)}
+                        // onClick={() => handleEditTask(task)}
                         className={`
               p-2 rounded-lg transition-colors
               ${isDark
@@ -666,9 +682,14 @@ export default function Dashboard() {
                       </motion.button>
 
                       <motion.button
+
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteTask(task._id);
+                        }}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => handleDeleteTask(task._id)}
+                        // onClick={() => handleDeleteTask(task._id)}
                         className={`
               p-2 rounded-lg transition-colors
               ${isDark
@@ -819,6 +840,100 @@ export default function Dashboard() {
                   >
                     {editingTask ? 'Update' : 'Create'}
                   </motion.button>
+                </div>
+              </motion.div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {viewTask && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              className="fixed inset-0 bg-black/60 backdrop-blur-md z-50"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={handleCloseViewModal}
+            />
+
+            {/* Modal Wrapper */}
+            <motion.div
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={handleCloseViewModal}
+            >
+              {/* Card */}
+              <motion.div
+                className={`
+            w-full max-w-lg rounded-2xl shadow-2xl border
+            ${isDark ? "bg-slate-900 border-slate-700" : "bg-white border-slate-200"}
+            p-6 sm:p-8
+          `}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Header */}
+                <div className="flex items-start justify-between mb-5">
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">
+                      Task Title
+                    </label>
+                    <h2 className={`text-xl sm:text-2xl font-bold leading-tight ${isDark ? "text-white" : "text-slate-900"
+                      }`}>
+                      {viewTask.title}
+                    </h2>
+
+                    
+                  </div>
+
+                  {/* Status Badge */}
+                  <span
+                    className={`
+                px-3 py-1 text-xs font-semibold rounded-full
+                ${viewTask.status === "completed"
+                        ? isDark
+                          ? "bg-green-900/40 text-green-300"
+                          : "bg-green-100 text-green-700"
+                        : isDark
+                          ? "bg-orange-900/40 text-orange-300"
+                          : "bg-orange-100 text-orange-700"
+                      }
+              `}
+                  >
+                    {viewTask.status === "completed" ? "Completed" : "Pending"}
+                  </span>
+                </div>
+
+                {/* Description */}
+                <div
+                  className={`
+              text-sm leading-relaxed whitespace-pre-wrap
+              ${isDark ? "text-slate-300" : "text-slate-700"}
+            `}
+                >
+                  <label className="block text-sm font-semibold mb-2">
+                      Description
+                    </label>
+                  {viewTask.description || "No description provided."}
+                </div>
+
+                {/* Footer */}
+                <div className="mt-8 flex justify-end">
+                  <button
+                    onClick={handleCloseViewModal}
+                    className={`
+                px-5 py-2.5 rounded-lg font-medium transition-all
+                ${isDark
+                        ? "bg-slate-800 text-white hover:bg-slate-700"
+                        : "bg-slate-100 text-slate-900 hover:bg-slate-200"
+                      }
+              `}
+                  >
+                    Close
+                  </button>
                 </div>
               </motion.div>
             </motion.div>
