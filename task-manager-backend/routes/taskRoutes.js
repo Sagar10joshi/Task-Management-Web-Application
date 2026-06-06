@@ -12,22 +12,22 @@ import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-/**
- * All task routes are protected
- */
+
+//   All task routes are protected
+
 router.use(protect);
 
-/**
- * CRUD + extra features
- */
+
+  // CRUD + extra features
+ 
 router.post("/", createTask);
 router.get("/", getTasks);
 router.put("/:id", updateTask);
 router.delete("/:id", deleteTask);
 
-/**
- * Toggle task status (pending <-> completed)
- */
+
+  // Toggle task status (pending <-> completed)
+ 
 router.patch("/:id/toggle", toggleTaskStatus);
 
 export default router;

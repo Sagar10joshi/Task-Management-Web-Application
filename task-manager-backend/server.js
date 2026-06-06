@@ -1,7 +1,8 @@
-
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import cookieParser from "cookie-parser";
 
 import dbConnect from "./config/db.js";
@@ -13,14 +14,20 @@ import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 dotenv.config({ path: "./.env" });
 
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: "Too many requests, try again later"
+});
+
+
 const app = express();
 
-/* ---------------- DB FIRST ---------------- */
+/* ---------------- Database Connection ---------------- */
 dbConnect();
 
-/* ---------------- MIDDLEWARE ORDER FIXED ---------------- */
 
-// 1. CORS FIRST (VERY IMPORTANT)
+//  CORS 
 app.use(
   cors({
     origin: [
@@ -33,11 +40,10 @@ app.use(
   })
 );
 
-
-// 3. Body parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(helmet());//for security in http headers
 
 /* ---------------- TEST ROUTE ---------------- */
 app.get("/", (req, res) => {
@@ -46,6 +52,7 @@ app.get("/", (req, res) => {
     message: "Task Manager API Running"
   });
 });
+
 app.get("/whoami", (req, res) => {
   res.json({
     server: "CURRENT TASK MANAGER BACKEND",
@@ -53,11 +60,11 @@ app.get("/whoami", (req, res) => {
   });
 });
 
-// console.log("SERVER STARTED");
 
 /* ---------------- ROUTES ---------------- */
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
+app.use("/api/auth", authLimiter);
 
 /* ---------------- ERROR HANDLERS ---------------- */
 app.use(notFound);
@@ -65,12 +72,7 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-// export default app;// Export the app instance
 
-
-
-
-//Only in development
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

@@ -1,9 +1,9 @@
 import Task from "../models/Task.js";
 
-/**
- * @desc Create task
- * @route POST /api/tasks
- */
+
+  // Create task
+  // @route POST /api/tasks
+ 
 export const createTask = async (req, res) => {
   try {
     const task = await Task.create({
@@ -23,10 +23,10 @@ export const createTask = async (req, res) => {
   }
 };
 
-/**
- * @desc Get all tasks (search + filter + pagination)
- * @route GET /api/tasks
- */
+
+  // Get all tasks (search + filter + pagination)
+  // @route GET /api/tasks
+ 
 export const getTasks = async (req, res) => {
   try {
     const { search, status, page = 1, limit = 5 } =
@@ -70,10 +70,10 @@ export const getTasks = async (req, res) => {
   }
 };
 
-/**
- * @desc Update task
- * @route PUT /api/tasks/:id
- */
+
+  // Update task
+  // @route PUT /api/tasks/:id
+ 
 export const updateTask = async (req, res) => {
   try {
     const task = await Task.findOne({
@@ -106,10 +106,9 @@ export const updateTask = async (req, res) => {
   }
 };
 
-/**
- * @desc Delete task
- * @route DELETE /api/tasks/:id
- */
+
+  // @route DELETE /api/tasks/:id
+ 
 export const deleteTask = async (req, res) => {
   try {
     const task = await Task.findOne({
@@ -138,10 +137,9 @@ export const deleteTask = async (req, res) => {
   }
 };
 
-/**
- * @desc Toggle task status
- * @route PATCH /api/tasks/:id/toggle
- */
+
+//   @route PATCH /api/tasks/:id/toggle
+ 
 export const toggleTaskStatus = async (req, res) => {
   try {
     const task = await Task.findOne({

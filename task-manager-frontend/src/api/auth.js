@@ -1,8 +1,8 @@
-const BASE_URL = "https://task-management-web-application-xpxz.onrender.com/api";
+// const BASE_URL = "https://task-management-web-application-xpxz.onrender.com/api";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
-/**
- * REGISTER USER
- */
+  // REGISTER USER
+ 
 export const registerUser = async (userData) => {
   
     const res = await fetch(`${BASE_URL}/auth/register`, {
@@ -10,7 +10,7 @@ export const registerUser = async (userData) => {
     headers: {
       "Content-Type": "application/json"
     },
-    credentials: "include", // 🔥 REQUIRED for cookies
+    credentials: "include", // for cookies
     body: JSON.stringify(userData)
   });
 
@@ -25,9 +25,9 @@ export const registerUser = async (userData) => {
 
 
 
-/**
- * GET CURRENT USER
- */
+
+  // GET CURRENT USER
+ 
 export const getMe = async () => {
   const res = await fetch(`${BASE_URL}/auth/me`, {
     method: "GET",
@@ -43,9 +43,9 @@ export const getMe = async () => {
   return data;
 };
 
-/**
- * LOGOUT USER
- */
+
+  // LOGOUT USER
+ 
 export const logoutUser = async () => {
   const res = await fetch(`${BASE_URL}/auth/logout`, {
     method: "POST",
@@ -63,16 +63,16 @@ export const logoutUser = async () => {
 
 
 
-/**
- * LOGIN USER
- */
+
+//  LOGIN USER
+ 
 export const loginUser = async (userData) => {
   const res = await fetch(`${BASE_URL}/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
-    credentials: "include", // 🔥 IMPORTANT for HTTP-only cookie
+    credentials: "include", //   for HTTP-only cookie
     body: JSON.stringify(userData)
   });
 

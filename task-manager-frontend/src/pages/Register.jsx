@@ -6,9 +6,8 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { BiLogoProductHunt } from 'react-icons/bi';
 import { BsCheckCircleFill, BsXCircleFill } from 'react-icons/bs';
 import { useNavigate } from "react-router-dom";
-import { registerUser } from "../api/auth"; // adjust path if needed
+import { registerUser } from "../api/auth"; 
 import toast from "react-hot-toast";
-// import Link from 'next/link';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -170,7 +169,10 @@ export default function Register() {
             animate="visible"
           >
             <div className="flex items-center justify-center gap-2 mb-4">
-              <BiLogoProductHunt className="text-purple-600 text-3xl" />
+              {/* <BiLogoProductHunt className="text-purple-600 text-3xl" /> */}
+              <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold">T</span>
+              </div>
               <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                 TaskFlow
               </span>
@@ -400,7 +402,7 @@ export default function Register() {
           animate={{ opacity: 0.75 }}
           transition={{ delay: 1 }}
         >
-          © 2024 TaskFlow. All rights reserved.
+          © {new Date().getFullYear()} TaskFlow. All rights reserved.
         </motion.p>
       </div>
     </motion.div>

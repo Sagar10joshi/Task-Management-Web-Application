@@ -1,13 +1,10 @@
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
 
-/**
- * @desc Register user
- * @route POST /api/auth/register
- */
+
+  // @route POST /api/auth/register
+ 
 export const registerUser = async (req, res) => {
-  //  console.log("REGISTER CONTROLLER HIT");
-  // console.log(req.body);
   
   try {
     const { name, email, password } = req.body;
@@ -45,10 +42,10 @@ export const registerUser = async (req, res) => {
   }
 };
 
-/**
- * @desc Login user
- * @route POST /api/auth/login
- */
+
+
+//  @route POST /api/auth/login
+ 
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -91,21 +88,8 @@ export const loginUser = async (req, res) => {
   }
 };
 
-/**
- * @desc Logout user
- * @route POST /api/auth/logout
- */
-// export const logoutUser = async (req, res) => {
-//   res.cookie("token", "", {
-//     httpOnly: true,
-//     expires: new Date(0)
-//   });
 
-//   res.status(200).json({
-//     success: true,
-//     message: "Logged out successfully"
-//   });
-// };
+//  @route POST /api/auth/logout
 
 export const logoutUser = async (req, res) => {
   res.cookie("token", "", {
@@ -124,10 +108,10 @@ export const logoutUser = async (req, res) => {
   });
 };
 
-/**
- * @desc Get user profile
- * @route GET /api/auth/me
- */
+
+  //  Get user profile
+  // @route GET /api/auth/me
+
 export const getMe = async (req, res) => {
   res.status(200).json({
     success: true,

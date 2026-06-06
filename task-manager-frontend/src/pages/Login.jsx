@@ -118,7 +118,10 @@ export default function Login() {
                         animate="visible"
                     >
                         <div className="flex items-center justify-center gap-2 mb-4">
-                            <BiLogoProductHunt className="text-indigo-600 text-3xl" />
+                            {/* <BiLogoProductHunt className="text-indigo-600 text-3xl" /> */}
+                            <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold">T</span>
+              </div>
                             <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                                 TaskFlow
                             </span>
@@ -216,12 +219,12 @@ export default function Login() {
                                     Remember me
                                 </span>
                             </label>
-                            <a
+                            {/* <a
                                 href="#"
                                 className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
                             >
                                 Forgot password?
-                            </a>
+                            </a> */}
                         </motion.div>
 
                         {/* Login Button */}
@@ -265,7 +268,7 @@ export default function Login() {
                     animate={{ opacity: 0.75 }}
                     transition={{ delay: 1 }}
                 >
-                    © 2024 TaskFlow. All rights reserved.
+                    © {new Date().getFullYear()} TaskFlow. All rights reserved.
                 </motion.p>
             </div>
         </motion.div>
