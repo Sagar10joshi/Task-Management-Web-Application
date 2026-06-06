@@ -47,6 +47,18 @@ export default function Dashboard() {
     fetchTasks();
   }, []);
 
+  useEffect(() => {
+  const checkAuth = async () => {
+    try {
+      await getMe();
+    } catch (err) {
+      navigate("/Login");
+    }
+  };
+
+  checkAuth();
+}, []);
+
   // Filter and search tasks
   // const filteredTasks = useMemo(() => {
   //   return tasks.filter(task => {

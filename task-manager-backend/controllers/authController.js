@@ -95,9 +95,26 @@ export const loginUser = async (req, res) => {
  * @desc Logout user
  * @route POST /api/auth/logout
  */
+// export const logoutUser = async (req, res) => {
+//   res.cookie("token", "", {
+//     httpOnly: true,
+//     expires: new Date(0)
+//   });
+
+//   res.status(200).json({
+//     success: true,
+//     message: "Logged out successfully"
+//   });
+// };
+
 export const logoutUser = async (req, res) => {
   res.cookie("token", "", {
     httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite:
+      process.env.NODE_ENV === "production"
+        ? "none"
+        : "lax",
     expires: new Date(0)
   });
 
