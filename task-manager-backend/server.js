@@ -62,9 +62,9 @@ app.get("/whoami", (req, res) => {
 
 
 /* ---------------- ROUTES ---------------- */
+app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
-app.use("/api/auth", authLimiter);
 
 /* ---------------- ERROR HANDLERS ---------------- */
 app.use(notFound);
