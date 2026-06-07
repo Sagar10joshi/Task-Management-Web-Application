@@ -7,7 +7,6 @@ import { BiLogoProductHunt } from 'react-icons/bi';
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../api/auth";
 import toast from "react-hot-toast";
-// import Link from 'next/link';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -54,15 +53,10 @@ export default function Login() {
 
         // console.log("Login success:", res);
 
-        // alert("Login successful!");
-
-        // Redirect to dashboard
         navigate("/dashboard");
 
     } catch (error) {
         console.log(error);
-
-        // alert(error.message || "Login failed");
         toast.error(error.message || "Login failed");
     } finally {
         setLoading(false);
@@ -118,7 +112,6 @@ export default function Login() {
                         animate="visible"
                     >
                         <div className="flex items-center justify-center gap-2 mb-4">
-                            {/* <BiLogoProductHunt className="text-indigo-600 text-3xl" /> */}
                             <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold">T</span>
               </div>

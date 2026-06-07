@@ -85,10 +85,10 @@ const Home = () => {
   };
 
   const tasks = [
-  { title: 'Build Login Page', status: 'Completed' },
-  { title: 'Connect Backend', status: 'Pending' },
-  { title: 'Deploy Project', status: 'Pending' },
-];
+    { title: 'Build Login Page', status: 'Completed' },
+    { title: 'Connect Backend', status: 'Pending' },
+    { title: 'Deploy Project', status: 'Pending' },
+  ];
 
 
   return (
@@ -370,13 +370,13 @@ const Home = () => {
             </motion.div>
           </div>
         </div>
-      </section> <br /> 
+      </section> <br />
 
       {/* Features Section */}
       <>
         <Features />
         <HowItWorks />
-         <DashboardPreview />
+        <DashboardPreview />
       </>
 
       {/* CTA Section */}
@@ -437,7 +437,8 @@ const Home = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Create Account <FiArrowRight className="w-5 h-5" />
+
+                Manage Tasks <FiArrowRight className="w-5 h-5" />
               </motion.button>
 
               {!isLoggedIn && (

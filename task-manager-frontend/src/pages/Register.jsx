@@ -102,8 +102,6 @@ export default function Register() {
 
       // console.log("User registered:", res);
 
-      // alert("Account created successfully!");
-
       navigate("/login");
 
     } catch (error) {
@@ -169,7 +167,6 @@ export default function Register() {
             animate="visible"
           >
             <div className="flex items-center justify-center gap-2 mb-4">
-              {/* <BiLogoProductHunt className="text-purple-600 text-3xl" /> */}
               <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold">T</span>
               </div>
@@ -242,7 +239,7 @@ export default function Register() {
               animate="visible"
             >
               <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Password
+                {/* Password */}
               </label>
               <div className="relative">
                 <input
@@ -308,7 +305,7 @@ export default function Register() {
               )}
             </motion.div>
 
-            {/* Confirm Password Input */}
+            {/* confirm Password Input */}
             <motion.div
               custom={4}
               variants={itemVariants}
