@@ -3,38 +3,27 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MdCheck } from "react-icons/md";
-import {
-  AiOutlineLogout,
-  AiOutlinePlus,
-  AiOutlineDelete,
-  AiOutlineEdit,
-  AiOutlineSearch
-} from 'react-icons/ai';
+import { AiOutlineLogout, AiOutlinePlus, AiOutlineDelete, AiOutlineEdit, AiOutlineSearch } from 'react-icons/ai';
 import { BsCheckCircle, BsCircle, BsMoon, BsSun } from 'react-icons/bs';
 import { BiLogoProductHunt } from 'react-icons/bi';
 import { MdCheckCircle } from 'react-icons/md';
-import {
-  getTasks,
-  createTask,
-  updateTask,
-  deleteTask,
-  toggleTaskStatus
-} from "../api/task";
-
-import {
-  getMe,
-  logoutUser
-} from "../api/auth";
-
+import { getTasks, createTask, updateTask, deleteTask, toggleTaskStatus } from "../api/task";
+import { getMe, logoutUser } from "../api/auth";
 import { useNavigate } from "react-router-dom";
+import TaskModal from "../components/TaskModal";
+import ViewTaskModal from "../components/ViewTaskModal";
+import DashboardSkeleton from "../components/DashboardSkeleton";
+import TaskList from "../components/TaskList";
+import DeleteConfirmModal from "../components/DeleteConfirmModal";
 
 export default function Dashboard() {
   const [tasks, setTasks] = useState([]);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [viewTask, setViewTask] = useState(null);
+  const [deleteTaskId, setDeleteTaskId] = useState(null);
+  const [deleteTaskTitle, setDeleteTaskTitle] = useState("");
 
-  const navigate = useNavigate();
   const [isDark, setIsDark] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -42,6 +31,7 @@ export default function Dashboard() {
   const [editingTask, setEditingTask] = useState(null);
   const [newTask, setNewTask] = useState({ title: '', description: '' });
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchUser();
@@ -207,6 +197,23 @@ export default function Dashboard() {
     }
   };
 
+  const confirmDeleteTask = async () => {
+    try {
+      await deleteTask(deleteTaskId);
+
+      setTasks(
+        tasks.filter(
+          task => task._id !== deleteTaskId
+        )
+      );
+
+      setDeleteTaskId(null);
+      setDeleteTaskTitle("");
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
   const handleToggleStatus = async (id) => {
     try {
       const data =
@@ -221,8 +228,6 @@ export default function Dashboard() {
       alert(error.message);
     }
   };
-
-  // https://task-management-web-application-delta.vercel.app/Home
 
   const handleLogout = async () => {
     try {
@@ -251,64 +256,9 @@ export default function Dashboard() {
     : 'bg-white border-slate-200 text-slate-900';
 
 
-  function DashboardSkeleton({ isDark }) {
-    return (
-      <div
-        className={`min-h-screen ${isDark ? "bg-slate-950" : "bg-slate-50"
-          } animate-pulse`}
-      >
-        {/* Navbar */}
-        <div
-          className={`h-20 border-b ${isDark
-            ? "bg-slate-900 border-slate-700"
-            : "bg-white border-slate-200"
-            }`}
-        >
-          <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
-            <div className="h-8 w-40 rounded bg-slate-300 dark:bg-slate-700" />
-            <div className="flex gap-3">
-              <div className="h-10 w-10 rounded-full bg-slate-300 dark:bg-slate-700" />
-              <div className="h-10 w-28 rounded bg-slate-300 dark:bg-slate-700" />
-            </div>
-          </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto p-6">
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            {[...Array(4)].map((_, i) => (
-              <div
-                key={i}
-                className={`h-32 rounded-xl ${isDark ? "bg-slate-900" : "bg-white"
-                  }`}
-              />
-            ))}
-          </div>
-
-          {/* Search */}
-          <div
-            className={`h-24 rounded-xl mb-8 ${isDark ? "bg-slate-900" : "bg-white"
-              }`}
-          />
-
-          {/* Tasks */}
-          <div className="space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div
-                key={i}
-                className={`h-28 rounded-xl ${isDark ? "bg-slate-900" : "bg-white"
-                  }`}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-
   if (loading) {
     return <DashboardSkeleton isDark={isDark} />;
+    // return <p>Loading..</p>
   }
 
   return (
@@ -515,431 +465,52 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Task List Section */}
-        {filteredTasks.length > 0 ? (
-          <motion.div
-            className="space-y-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            <h2 className="text-lg font-bold mb-4">Tasks</h2>
-            <AnimatePresence>
-              {filteredTasks.map((task, idx) => (
-                <motion.div
-                  key={task._id}
-                  className={`
-            rounded-xl p-6 border shadow-sm transition-all
-            ${task.status === "completed"
-                      ? isDark
-                        ? "bg-green-950/20 border-green-800"
-                        : "bg-green-50 border-green-200"
-                      : cardClass
-                    }
-              `}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ delay: idx * 0.05 }}
-                  whileHover={{ y: -2 }}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 flex gap-4 cursor-pointer"
-                    // onClick={() => handleViewTask(task)}
-                    >
+        <TaskList
+          filteredTasks={filteredTasks}
+          isDark={isDark}
+          cardClass={cardClass}
+          searchTerm={searchTerm}
+          filterStatus={filterStatus}
+          setShowModal={setShowModal}
+          handleViewTask={handleViewTask}
+          handleToggleStatus={handleToggleStatus}
+          handleEditTask={handleEditTask}
+          handleDeleteTask={handleDeleteTask}
 
-                      {/* Square Toggle */}
-                      <motion.button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleToggleStatus(task._id);
-                        }}
-                        whileHover={{ scale: 1.08 }}
-                        whileTap={{ scale: 0.9 }}
-                        // onClick={() => handleToggleStatus(task._id)}
-                        className="flex-shrink-0 mt-1 focus:outline-none"
-                      >
-                        <div
-                          className={`
-                        w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all
-                          ${task.status === "completed"
-                              ? "bg-green-500 border-green-500"
-                              : isDark
-                                ? "border-slate-500 bg-slate-800"
-                                : "border-slate-400 bg-white"
-                            }
-                        `}
-                        >
-                          {task.status === "completed" && (
-                            <MdCheck
-                              className="text-white"
-                              size={16}
-                            />
-                          )}
-                        </div>
-                      </motion.button>
-
-                      <div className="flex-1">
-                        <h3
-                          className={`
-    text-lg font-semibold transition-all flex items-center gap-2 cursor-pointer
-    ${task.status === "completed"
-                              ? isDark
-                                ? "line-through text-slate-400"
-                                : "line-through text-slate-500"
-                              : isDark
-                                ? "text-white"
-                                : "text-slate-900"
-                            }
-  `}
-                          onClick={() => handleViewTask(task)}
-                          title="Click to view details"
-                        >
-                          <span className="
-    text-xs font-bold px-2 py-0.5 rounded-md
-    bg-slate-200 text-slate-700
-    dark:bg-slate-800 dark:text-slate-300
-  ">
-                            #{idx + 1}
-                          </span>
-
-                          {task.title}
-                        </h3>
-                        {/* <p
-                          className={`
-                text-sm mt-2
-                ${isDark
-                              ? "text-slate-300"
-                              : "text-slate-600"
-                            }
-              `}
-                        >
-                          {task.description}
-                        </p> */}
-
-                        <div className="flex items-center gap-3 mt-4 flex-wrap">
-
-                          {/* Status Badge */}
-                          <span
-                            className={`
-                        inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold
-                          ${task.status === "completed"
-                                ? isDark
-                                  ? "bg-green-900/40 text-green-300"
-                                  : "bg-green-100 text-green-800"
-                                : isDark
-                                  ? "bg-orange-900/40 text-orange-300"
-                                  : "bg-orange-100 text-orange-800"
-                              }
-                                `}
-                          >
-                            {task.status === "completed" ? (
-                              <>
-                                ✓ Completed
-                              </>
-                            ) : (
-                              <>
-                                ⏳ Pending
-                              </>
-                            )}
-                          </span>
-
-                          {/* Date */}
-                          <span
-                            className={`
-                  text-xs font-medium
-                  ${isDark
-                                ? "text-slate-400"
-                                : "text-slate-500"
-                              }
-                `}
-                          >
-                            {new Date(task.createdAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-2 flex-shrink-0">
-                      <motion.button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditTask(task);
-                        }}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        // onClick={() => handleEditTask(task)}
-                        className={`
-              p-2 rounded-lg transition-colors
-              ${isDark
-                            ? "hover:bg-slate-800 text-sky-400"
-                            : "hover:bg-slate-100 text-sky-600"
-                          }
-            `}
-                        title="Edit task"
-                      >
-                        <AiOutlineEdit size={18} />
-                      </motion.button>
-
-                      <motion.button
-
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteTask(task._id);
-                        }}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        // onClick={() => handleDeleteTask(task._id)}
-                        className={`
-              p-2 rounded-lg transition-colors
-              ${isDark
-                            ? "hover:bg-slate-800 text-rose-400"
-                            : "hover:bg-slate-100 text-rose-600"
-                          }
-            `}
-                        title="Delete task"
-                      >
-                        <AiOutlineDelete size={18} />
-                      </motion.button>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
-        ) : (
-          <motion.div
-            className={`${cardClass} rounded-xl p-12 border shadow-sm text-center`}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="text-5xl mb-4">🎯</div>
-            <h3 className="text-lg font-semibold mb-2">No tasks found</h3>
-            <p className={`${isDark ? 'text-slate-400' : 'text-slate-600'} mb-6`}>
-              {searchTerm || filterStatus !== 'all'
-                ? 'Try adjusting your filters'
-                : 'Create your first task to get started'}
-            </p>
-            {!searchTerm && filterStatus === 'all' && (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowModal(true)}
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold px-6 py-3 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all"
-              >
-                <AiOutlinePlus size={20} />
-                Create Task
-              </motion.button>
-            )}
-          </motion.div>
-        )}
+          setDeleteTaskId={setDeleteTaskId}
+          setDeleteTaskTitle={setDeleteTaskTitle}
+        />
       </div>
 
       {/* Modal */}
-      <AnimatePresence>
-        {showModal && (
-          <>
-            <motion.div
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={handleCloseModal}
-            />
-            <motion.div
-              className={`fixed inset-0 z-50 flex items-center justify-center p-4`}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              onClick={handleCloseModal}
-            >
-              <motion.div
-                className={`${cardClass} rounded-2xl shadow-2xl p-8 w-full max-w-md border`}
-                onClick={(e) => e.stopPropagation()}
-                initial={{ y: 20 }}
-                animate={{ y: 0 }}
-              >
-                <h2 className="text-2xl font-bold mb-6">
-                  {editingTask ? 'Edit Task' : 'Add New Task'}
-                </h2>
+      <TaskModal
+        showModal={showModal}
+        handleCloseModal={handleCloseModal}
+        editingTask={editingTask}
+        newTask={newTask}
+        setNewTask={setNewTask}
+        errors={errors}
+        setErrors={setErrors}
+        isDark={isDark}
+        cardClass={cardClass}
+        handleAddTask={handleAddTask}
+      />
 
-                <div className="space-y-4">
-                  {/* Title Input */}
-                  <div>
-                    <label className="block text-sm font-semibold mb-2">
-                      Task Title
-                    </label>
-                    <input
-                      type="text"
-                      value={newTask.title}
-                      onChange={(e) => {
-                        setNewTask({ ...newTask, title: e.target.value });
-                        if (errors.title) setErrors({ ...errors, title: '' });
-                      }}
-                      className={`w-full px-4 py-2 rounded-lg border-2 transition-colors focus:outline-none ${errors.title
-                        ? `border-red-500 ${isDark ? 'bg-red-900/20' : 'bg-red-50'}`
-                        : `border-slate-200 ${isDark ? 'bg-slate-800 text-white border-slate-600' : 'bg-white'}`
-                        }`}
-                      placeholder="Enter task title"
-                    />
-                    {errors.title && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.title}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Description Input */}
-                  <div>
-                    <label className="block text-sm font-semibold mb-2">
-                      Description
-                    </label>
-                    <textarea
-                      value={newTask.description}
-                      onChange={(e) => {
-                        setNewTask({
-                          ...newTask,
-                          description: e.target.value
-                        });
-                        if (errors.description)
-                          setErrors({ ...errors, description: '' });
-                      }}
-                      rows="4"
-                      className={`w-full px-4 py-2 rounded-lg border-2 transition-colors focus:outline-none resize-none ${errors.description
-                        ? `border-red-500 ${isDark ? 'bg-red-900/20' : 'bg-red-50'}`
-                        : `border-slate-200 ${isDark ? 'bg-slate-800 text-white border-slate-600' : 'bg-white'}`
-                        }`}
-                      placeholder="Enter task description"
-                    />
-                    {errors.description && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.description}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex gap-3 mt-8">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleCloseModal}
-                    className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-colors ${isDark
-                      ? 'bg-slate-800 text-white hover:bg-slate-700'
-                      : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
-                      }`}
-                  >
-                    Cancel
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleAddTask}
-                    className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all"
-                  >
-                    {editingTask ? 'Update' : 'Create'}
-                  </motion.button>
-                </div>
-              </motion.div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {viewTask && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              className="fixed inset-0 bg-black/60 backdrop-blur-md z-50"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={handleCloseViewModal}
-            />
-
-            {/* Modal Wrapper */}
-            <motion.div
-              className="fixed inset-0 z-50 flex items-center justify-center p-4"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              onClick={handleCloseViewModal}
-            >
-              {/* Card */}
-              <motion.div
-                className={`
-            w-full max-w-lg rounded-2xl shadow-2xl border
-            ${isDark ? "bg-slate-900 border-slate-700" : "bg-white border-slate-200"}
-            p-6 sm:p-8
-          `}
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* Header */}
-                <div className="flex items-start justify-between mb-5">
-                  <div>
-                    <label className="block text-sm font-semibold mb-2">
-                      Task Title
-                    </label>
-                    <h2 className={`text-xl sm:text-2xl font-bold leading-tight ${isDark ? "text-white" : "text-slate-900"
-                      }`}>
-                      {viewTask.title}
-                    </h2>
-
-                    
-                  </div>
-
-                  {/* Status Badge */}
-                  <span
-                    className={`
-                px-3 py-1 text-xs font-semibold rounded-full
-                ${viewTask.status === "completed"
-                        ? isDark
-                          ? "bg-green-900/40 text-green-300"
-                          : "bg-green-100 text-green-700"
-                        : isDark
-                          ? "bg-orange-900/40 text-orange-300"
-                          : "bg-orange-100 text-orange-700"
-                      }
-              `}
-                  >
-                    {viewTask.status === "completed" ? "Completed" : "Pending"}
-                  </span>
-                </div>
-
-                {/* Description */}
-                <div
-                  className={`
-              text-sm leading-relaxed whitespace-pre-wrap
-              ${isDark ? "text-slate-300" : "text-slate-700"}
-            `}
-                >
-                  <label className="block text-sm font-semibold mb-2">
-                      Description
-                    </label>
-                  {viewTask.description || "No description provided."}
-                </div>
-
-                {/* Footer */}
-                <div className="mt-8 flex justify-end">
-                  <button
-                    onClick={handleCloseViewModal}
-                    className={`
-                px-5 py-2.5 rounded-lg font-medium transition-all
-                ${isDark
-                        ? "bg-slate-800 text-white hover:bg-slate-700"
-                        : "bg-slate-100 text-slate-900 hover:bg-slate-200"
-                      }
-              `}
-                  >
-                    Close
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      <ViewTaskModal
+        viewTask={viewTask}
+        handleCloseViewModal={handleCloseViewModal}
+        isDark={isDark}
+      />
+      <DeleteConfirmModal
+        isOpen={!!deleteTaskId}
+        taskTitle={deleteTaskTitle}
+        isDark={isDark}
+        onCancel={() => {
+          setDeleteTaskId(null);
+          setDeleteTaskTitle("");
+        }}
+        onConfirm={confirmDeleteTask}
+      />
     </motion.div>
   );
 }
