@@ -97,6 +97,12 @@ The application allows users to register, log in securely using JWT authenticati
 ### ➕ Add Task
 <img src="./Screenshots/addtask.png" alt="Add Task" width="800"/>
 
+### 👁️ View Task Details
+<img src="./Screenshots/view-task.png" alt="View Task" width="800"/>
+
+### ✏️ Edit Task
+<img src="./Screenshots/edit-task.png" alt="Edit Task" width="800"/>
+
 ### 🗑️ Delete Task
 <img src="./Screenshots/delete_task.png" alt="Delete Task" width="800"/>
 
