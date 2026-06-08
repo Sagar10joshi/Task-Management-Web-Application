@@ -50,7 +50,6 @@ const ViewTaskModal = ({
 
                                 </div>
 
-                                {/* Status Badge */}
                                 <span
                                     className={`
                 px-3 py-1 text-xs font-semibold rounded-full

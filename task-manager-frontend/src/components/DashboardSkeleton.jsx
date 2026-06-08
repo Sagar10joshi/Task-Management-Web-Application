@@ -5,7 +5,6 @@ function DashboardSkeleton({ isDark }) {
 
   return (
     <div className={`min-h-screen ${baseBg}`}>
-      {/* animated background glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -left-40 w-96 h-96 bg-indigo-500/10 blur-3xl animate-pulse" />
         <div className="absolute top-1/2 -right-40 w-96 h-96 bg-purple-500/10 blur-3xl animate-pulse" />
@@ -14,7 +13,6 @@ function DashboardSkeleton({ isDark }) {
       {/* Navbar */}
       <div className={`h-20 border-b ${border} ${cardBg} backdrop-blur-xl`}>
         <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
-          {/* Logo shimmer */}
           <div className="h-8 w-40 rounded-lg shimmer" />
 
           {/* user */}
@@ -83,7 +81,6 @@ function DashboardSkeleton({ isDark }) {
         </div>
       </div>
 
-      {/* shimmer animation style */}
       <style>
         {`
           .shimmer {

@@ -114,7 +114,7 @@ task-manager-frontend/
 ├── eslint.config.js
 ├── index.html
 ├── package.json
-└── vite.config.js   (if present)```
+└── vite.config.js 
 
 ### Backend Structure
 
@@ -272,14 +272,26 @@ http://localhost:5000
 
 ---
 
-## Security Features
+## Advanced Features Implemented
 
-* Password Hashing with bcryptjs
-* JWT Authentication
-* HTTP-Only Cookies
-* Protected API Routes
-* User-Specific Task Access
-* Secure Middleware Validation
+* Search tasks by title/description
+* Filter tasks by status (pending/completed)
+* Pagination for optimized performance
+* User-specific data isolation
+* Secure REST API architecture
+
+---
+
+## Security Highlights
+
+* JWT Authentication using HTTP-only cookies
+* Password hashing using bcryptjs
+* Protected API routes with middleware
+* Rate limiting on authentication routes
+* Helmet for secure HTTP headers
+* CSRF protection implemented
+* CORS restricted to trusted origins
+* User-specific task access control
 
 ---
 

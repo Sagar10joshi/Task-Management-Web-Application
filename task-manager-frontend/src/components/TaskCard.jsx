@@ -17,12 +17,11 @@ export default function TaskCard({
     <motion.div
       className={`
         rounded-xl p-4 sm:p-6 border shadow-sm transition-all
-        ${
-          task.status === "completed"
-            ? isDark
-              ? "bg-green-950/20 border-green-800"
-              : "bg-green-50 border-green-200"
-            : cardClass
+        ${task.status === "completed"
+          ? isDark
+            ? "bg-green-950/20 border-green-800"
+            : "bg-green-50 border-green-200"
+          : cardClass
         }
       `}
       initial={{ opacity: 0, x: -20 }}
@@ -50,10 +49,9 @@ export default function TaskCard({
             <div
               className={`
                 w-5 h-5 sm:w-6 sm:h-6 rounded-md border-2 flex items-center justify-center transition-all
-                ${
-                  task.status === "completed"
-                    ? "bg-green-500 border-green-500"
-                    : isDark
+                ${task.status === "completed"
+                  ? "bg-green-500 border-green-500"
+                  : isDark
                     ? "border-slate-500 bg-slate-800"
                     : "border-slate-400 bg-white"
                 }
@@ -72,12 +70,11 @@ export default function TaskCard({
             <h3
               className={`
                 text-base sm:text-lg font-semibold transition-all flex items-start sm:items-center gap-2 cursor-pointer break-words
-                ${
-                  task.status === "completed"
-                    ? isDark
-                      ? "line-through text-slate-400"
-                      : "line-through text-slate-500"
-                    : isDark
+                ${task.status === "completed"
+                  ? isDark
+                    ? "line-through text-slate-400"
+                    : "line-through text-slate-500"
+                  : isDark
                     ? "text-white"
                     : "text-slate-900"
                 }
@@ -95,18 +92,29 @@ export default function TaskCard({
               <span className="break-words">{task.title}</span>
             </h3>
 
-            {/* META */}
+            <p
+              className={`mt-2 text-sm ${isDark ? "text-slate-400" : "text-slate-600"
+                }`}
+              style={{
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
+            >
+              {task.description}
+            </p>
+
             <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-3 sm:mt-4">
 
               <span
                 className={`
                   inline-flex items-center gap-1 px-2 sm:px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold
-                  ${
-                    task.status === "completed"
-                      ? isDark
-                        ? "bg-green-900/40 text-green-300"
-                        : "bg-green-100 text-green-800"
-                      : isDark
+                  ${task.status === "completed"
+                    ? isDark
+                      ? "bg-green-900/40 text-green-300"
+                      : "bg-green-100 text-green-800"
+                    : isDark
                       ? "bg-orange-900/40 text-orange-300"
                       : "bg-orange-100 text-orange-800"
                   }
@@ -116,9 +124,8 @@ export default function TaskCard({
               </span>
 
               <span
-                className={`text-[10px] sm:text-xs font-medium ${
-                  isDark ? "text-slate-400" : "text-slate-500"
-                }`}
+                className={`text-[10px] sm:text-xs font-medium ${isDark ? "text-slate-400" : "text-slate-500"
+                  }`}
               >
                 {new Date(task.createdAt).toLocaleDateString()}
               </span>

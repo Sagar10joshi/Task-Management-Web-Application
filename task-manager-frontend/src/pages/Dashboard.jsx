@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MdCheck } from "react-icons/md";
 import { AiOutlineLogout, AiOutlinePlus, AiOutlineDelete, AiOutlineEdit, AiOutlineSearch } from 'react-icons/ai';
@@ -15,11 +15,16 @@ import ViewTaskModal from "../components/ViewTaskModal";
 import DashboardSkeleton from "../components/DashboardSkeleton";
 import TaskList from "../components/TaskList";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
+import ProfileDropdown from "../components/ProfileDropdown";
+
 
 export default function Dashboard() {
   const [tasks, setTasks] = useState([]);
+
+  const [showProfile, setShowProfile] = useState(false);
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // first page load
+  const [actionLoading, setActionLoading] = useState(false); // add/edit/delete/toggle
   const [viewTask, setViewTask] = useState(null);
   const [deleteTaskId, setDeleteTaskId] = useState(null);
   const [deleteTaskTitle, setDeleteTaskTitle] = useState("");
@@ -32,11 +37,36 @@ export default function Dashboard() {
   const [newTask, setNewTask] = useState({ title: '', description: '' });
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+  const profileRef = useRef(null);
+  const filteredTasks = tasks;
+
+
+  const [currentPage, setCurrentPage] =
+    useState(1);
+
+  const [pages, setPages] =
+    useState(1);
+
+  const [statistics, setStatistics] = useState({
+    total: 0,
+    completed: 0,
+    pending: 0,
+    completionRate: 0
+  });
 
   useEffect(() => {
     fetchUser();
-    fetchTasks();
   }, []);
+
+
+  useEffect(() => {
+  fetchTasks(
+    currentPage,
+    searchTerm,
+    filterStatus,
+    true
+  );
+}, [currentPage]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -58,48 +88,38 @@ export default function Dashboard() {
     setViewTask(null);
   };
 
-  // Filter and search tasks
-  // const filteredTasks = useMemo(() => {
-  //   return tasks.filter(task => {
-  //     const matchesSearch = task.title
-  //       .toLowerCase()
-  //       .includes(searchTerm.toLowerCase());
-  //     const matchesFilter =
-  //       filterStatus === 'all' || task.status === filterStatus;
-  //     return matchesSearch && matchesFilter;
-  //   });
-  // }, [tasks, searchTerm, filterStatus]);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target)
+      ) {
+        setShowProfile(false);
+      }
+    };
 
-  const filteredTasks = useMemo(() => {
-    return tasks
-      .filter(task => {
-        const matchesSearch = task.title
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase());
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside
+    );
 
-        const matchesFilter =
-          filterStatus === 'all' || task.status === filterStatus;
+    return () => {
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
+    };
+  }, []);
 
-        return matchesSearch && matchesFilter;
-      })
-      .sort((a, b) => {
-        // pending first, completed last
-        if (a.status === b.status) return 0;
-        if (a.status === 'pending') return -1;
-        return 1;
-      });
-  }, [tasks, searchTerm, filterStatus]);
+  useEffect(() => {
+  setCurrentPage(1);
 
-  // Statistics
-  const statistics = useMemo(() => {
-    const total = tasks.length;
-    const completed = tasks.filter(t => t.status === 'completed').length;
-    const pending = tasks.filter(t => t.status === 'pending').length;
-    const completionRate =
-      total === 0 ? 0 : Math.round((completed / total) * 100);
-
-    return { total, completed, pending, completionRate };
-  }, [tasks]);
+  fetchTasks(
+    1,
+    searchTerm,
+    filterStatus
+  );
+}, [searchTerm, filterStatus]);
 
 
   const fetchUser = async () => {
@@ -112,19 +132,43 @@ export default function Dashboard() {
   };
 
 
-  const fetchTasks = async () => {
-    try {
-      setLoading(true);
 
-      const data = await getTasks();
+  const fetchTasks = async (
+    page = currentPage,
+    search = searchTerm,
+    status = filterStatus,
+    showSkeleton = false
+  ) => {
+    try {
+      if (showSkeleton) {
+        setLoading(true);
+      }
+
+      const data = await getTasks(
+        page,
+        search,
+        status
+      );
 
       setTasks(data.tasks);
+      setPages(data.pages);
+
+      if (data.stats) {
+        setStatistics(data.stats);
+      }
+
     } catch (error) {
       console.error(error);
     } finally {
-      setLoading(false);
+      if (showSkeleton) {
+        setLoading(false);
+      }
     }
   };
+
+
+
+
 
   const validateTask = () => {
     const newErrors = {};
@@ -143,7 +187,7 @@ export default function Dashboard() {
 
     try {
       if (editingTask) {
-        const data = await updateTask(
+        await updateTask(
           editingTask._id,
           {
             title: newTask.title,
@@ -151,18 +195,14 @@ export default function Dashboard() {
           }
         );
 
-        setTasks(tasks.map(task =>
-          task._id === editingTask._id
-            ? data.task
-            : task
-        ));
+        await fetchTasks(currentPage, false);
       } else {
-        const data = await createTask({
+        await createTask({
           title: newTask.title,
           description: newTask.description
         });
 
-        setTasks([data.task, ...tasks]);
+        await fetchTasks(currentPage, false);
       }
 
       setShowModal(false);
@@ -189,9 +229,13 @@ export default function Dashboard() {
     try {
       await deleteTask(id);
 
-      setTasks(
-        tasks.filter(task => task._id !== id)
-      );
+      // await fetchTasks(currentPage, false);
+      await fetchTasks(
+  currentPage,
+  searchTerm,
+  filterStatus,
+  false
+);
     } catch (error) {
       alert(error.message);
     }
@@ -201,11 +245,12 @@ export default function Dashboard() {
     try {
       await deleteTask(deleteTaskId);
 
-      setTasks(
-        tasks.filter(
-          task => task._id !== deleteTaskId
-        )
-      );
+      await fetchTasks(
+  currentPage,
+  searchTerm,
+  filterStatus,
+  false
+);
 
       setDeleteTaskId(null);
       setDeleteTaskTitle("");
@@ -214,16 +259,18 @@ export default function Dashboard() {
     }
   };
 
+
+
   const handleToggleStatus = async (id) => {
     try {
-      const data =
-        await toggleTaskStatus(id);
+      await toggleTaskStatus(id);
 
-      setTasks(tasks.map(task =>
-        task._id === id
-          ? data.task
-          : task
-      ));
+      await fetchTasks(
+  currentPage,
+  searchTerm,
+  filterStatus,
+  false
+);
     } catch (error) {
       alert(error.message);
     }
@@ -305,20 +352,45 @@ export default function Dashboard() {
               </motion.button>
 
               {/* User Section */}
-              <div className="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
 
-                {/* User Avatar */}
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
-                  {user?.name?.charAt(0)?.toUpperCase()}
-                </div>
+              <div
+                ref={profileRef}
+                className="relative flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700"
+              >
+                {/* Clickable Profile */}
+                <motion.button
+                  onClick={() =>
+                    setShowProfile(!showProfile)
+                  }
+                  whileHover={{ scale: 1.02 }}
+                  className="flex items-center gap-3"
+                >
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+                    {user?.name?.charAt(0)?.toUpperCase()}
+                  </div>
 
-                {/* User Info */}
-                <div className="hidden sm:block pr-3 border-r border-slate-200 dark:border-slate-700">
-                  <p className="text-sm font-semibold">{user?.name}</p>
-                  <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                    {user?.email}
-                  </p>
-                </div>
+                  <div className="hidden sm:block pr-3 border-r border-slate-200 dark:border-slate-700 text-left">
+                    <p className="text-sm font-semibold">
+                      {user?.name}
+                    </p>
+
+                    <p
+                      className={`text-xs ${isDark
+                        ? "text-slate-400"
+                        : "text-slate-500"
+                        }`}
+                    >
+                      {user?.email}
+                    </p>
+                  </div>
+                </motion.button>
+
+                <ProfileDropdown
+                  show={showProfile}
+                  user={user}
+                  statistics={statistics}
+                  isDark={isDark}
+                />
 
                 {/* Logout */}
                 <motion.button
@@ -329,9 +401,10 @@ export default function Dashboard() {
                   title="Logout"
                 >
                   <AiOutlineLogout size={18} />
-                  <span className="text-sm font-medium">Logout</span>
+                  <span className="text-sm font-medium">
+                    Logout
+                  </span>
                 </motion.button>
-
               </div>
             </div>
           </div>
@@ -480,7 +553,49 @@ export default function Dashboard() {
           setDeleteTaskId={setDeleteTaskId}
           setDeleteTaskTitle={setDeleteTaskTitle}
         />
+
+        <div className="flex justify-center items-center gap-2 mt-8">
+          <button
+            disabled={currentPage === 1}
+            onClick={() =>
+              setCurrentPage(prev => prev - 1)
+            }
+            className="px-4 py-2 rounded-lg border"
+          >
+            Previous
+          </button>
+
+          {[...Array(pages)].map((_, index) => (
+            <button
+              key={index}
+              onClick={() =>
+                setCurrentPage(index + 1)
+              }
+              className={`px-4 py-2 rounded-lg ${currentPage === index + 1
+                ? "bg-indigo-600 text-white"
+                : "border"
+                }`}
+            >
+              {index + 1}
+            </button>
+          ))}
+
+          <button
+            disabled={currentPage === pages}
+            onClick={() =>
+              setCurrentPage(prev => prev + 1)
+            }
+            className="px-4 py-2 rounded-lg border"
+          >
+            Next
+          </button>
+        </div>
+
+
+
       </div>
+
+
 
       {/* Modal */}
       <TaskModal

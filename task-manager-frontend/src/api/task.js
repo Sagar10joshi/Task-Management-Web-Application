@@ -1,8 +1,23 @@
 // const BASE_URL = "https://task-management-web-application-xpxz.onrender.com/api/tasks";
 const BASE_URL = import.meta.env.VITE_API_URL;
 
-export const getTasks = async () => {
-  const res = await fetch(`${BASE_URL}/tasks`, {
+
+export const getTasks = async (
+  page = 1,
+  search = "",
+  status = "all"
+) => {
+  let url = `${BASE_URL}/tasks?page=${page}`;
+
+  if (search) {
+    url += `&search=${encodeURIComponent(search)}`;
+  }
+
+  if (status !== "all") {
+    url += `&status=${status}`;
+  }
+
+  const res = await fetch(url, {
     credentials: "include",
   });
 

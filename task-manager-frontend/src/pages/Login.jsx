@@ -212,12 +212,7 @@ export default function Login() {
                                     Remember me
                                 </span>
                             </label>
-                            {/* <a
-                                href="#"
-                                className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
-                            >
-                                Forgot password?
-                            </a> */}
+                         
                         </motion.div>
 
                         {/* Login Button */}

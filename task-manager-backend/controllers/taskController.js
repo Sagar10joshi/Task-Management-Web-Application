@@ -1,9 +1,9 @@
 import Task from "../models/Task.js";
 
 
-  // Create task
-  // @route POST /api/tasks
- 
+// Create task
+// @route POST /api/tasks
+
 export const createTask = async (req, res) => {
   try {
     const task = await Task.create({
@@ -24,27 +24,42 @@ export const createTask = async (req, res) => {
 };
 
 
-  // Get all tasks (search + filter + pagination)
-  // @route GET /api/tasks
- 
+// Get all tasks (search + filter + pagination)
+// @route GET /api/tasks
+
 export const getTasks = async (req, res) => {
   try {
     const { search, status, page = 1, limit = 5 } =
       req.query;
 
+
     const query = {
       userId: req.user._id
     };
 
-    // Search
     if (search) {
-      query.$text = { $search: search };
+      query.$or = [
+        {
+          title: {
+            $regex: search,
+            $options: "i"
+          }
+        },
+        {
+          description: {
+            $regex: search,
+            $options: "i"
+          }
+        }
+      ];
     }
 
     // Filter
     if (status) {
       query.status = status;
     }
+
+    // console.log("FINAL QUERY =", query);
 
     const skip = (page - 1) * limit;
 
@@ -53,13 +68,53 @@ export const getTasks = async (req, res) => {
       .skip(skip)
       .limit(Number(limit));
 
-    const total = await Task.countDocuments(query);
+    // total tasks of user (NO FILTER)
+    const totalTasks = await Task.countDocuments({
+      userId: req.user._id
+    });
+
+    // global completed
+    const completed = await Task.countDocuments({
+      userId: req.user._id,
+      status: "completed"
+    });
+
+    // global pending
+    const pending = await Task.countDocuments({
+      userId: req.user._id,
+      status: "pending"
+    });
+
+    // global completion rate
+    const completionRate =
+      totalTasks === 0
+        ? 0
+        : Math.round(
+          (completed / totalTasks) * 100
+        );
+
+
+    const filteredTotal =
+      await Task.countDocuments(query);
 
     res.status(200).json({
       success: true,
-      total,
+
+      total: filteredTotal,
+
       page: Number(page),
-      pages: Math.ceil(total / limit),
+
+      pages: Math.ceil(
+        filteredTotal / limit
+      ),
+
+      stats: {
+        total: totalTasks,
+        completed,
+        pending,
+        completionRate
+      },
+
       tasks
     });
   } catch (error) {
@@ -71,9 +126,9 @@ export const getTasks = async (req, res) => {
 };
 
 
-  // Update task
-  // @route PUT /api/tasks/:id
- 
+// Update task
+// @route PUT /api/tasks/:id
+
 export const updateTask = async (req, res) => {
   try {
     const task = await Task.findOne({
@@ -107,8 +162,8 @@ export const updateTask = async (req, res) => {
 };
 
 
-  // @route DELETE /api/tasks/:id
- 
+// @route DELETE /api/tasks/:id
+
 export const deleteTask = async (req, res) => {
   try {
     const task = await Task.findOne({
@@ -139,7 +194,7 @@ export const deleteTask = async (req, res) => {
 
 
 //   @route PATCH /api/tasks/:id/toggle
- 
+
 export const toggleTaskStatus = async (req, res) => {
   try {
     const task = await Task.findOne({

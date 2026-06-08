@@ -22,6 +22,13 @@ router.use(protect);
  
 router.post("/", createTask);
 router.get("/", getTasks);
+// router.get("/", (req, res) => {
+//   console.log("ROUTE HIT");
+
+//   res.json({
+//     test: true
+//   });
+// });
 router.put("/:id", updateTask);
 router.delete("/:id", deleteTask);
 
