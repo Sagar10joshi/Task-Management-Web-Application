@@ -2,6 +2,18 @@ import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
 
 
+
+  //  Get user profile
+  // @route GET /api/auth/me
+
+export const getMe = async (req, res) => {
+  res.status(200).json({
+    success: true,
+    user: req.user
+  });
+};
+
+
   // @route POST /api/auth/register
  
 export const registerUser = async (req, res) => {
@@ -108,13 +120,3 @@ export const logoutUser = async (req, res) => {
   });
 };
 
-
-  //  Get user profile
-  // @route GET /api/auth/me
-
-export const getMe = async (req, res) => {
-  res.status(200).json({
-    success: true,
-    user: req.user
-  });
-};
