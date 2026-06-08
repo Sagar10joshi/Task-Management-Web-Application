@@ -1,7 +1,7 @@
 // const BASE_URL = "https://task-management-web-application-xpxz.onrender.com/api/tasks";
 const BASE_URL = import.meta.env.VITE_API_URL;
 
-
+//GET ALL TASKS
 export const getTasks = async (
   page = 1,
   search = "",
@@ -29,7 +29,7 @@ export const getTasks = async (
 
   return data;
 };
-
+//CREAT TASK
 export const createTask = async (taskData) => {
   const res = await fetch(`${BASE_URL}/tasks`, {
     method: "POST",
@@ -49,6 +49,8 @@ export const createTask = async (taskData) => {
   return data;
 };
 
+
+//UPDATE TASK
 export const updateTask = async (id, taskData) => {
   const res = await fetch(`${BASE_URL}/tasks/${id}`, {
     method: "PUT",
@@ -68,6 +70,7 @@ export const updateTask = async (id, taskData) => {
   return data;
 };
 
+//DELETE TASK
 export const deleteTask = async (id) => {
   const res = await fetch(`${BASE_URL}/tasks/${id}`, {
     method: "DELETE",
@@ -83,6 +86,8 @@ export const deleteTask = async (id) => {
   return data;
 };
 
+
+//TOGGLE TASK 
 export const toggleTaskStatus = async (id) => {
   const res = await fetch(`${BASE_URL}/tasks/${id}/toggle`, {
     method: "PATCH",
