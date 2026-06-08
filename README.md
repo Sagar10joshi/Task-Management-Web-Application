@@ -76,6 +76,33 @@ The application allows users to register, log in securely using JWT authenticati
 
 ---
 
+
+## 📸 Screenshots
+
+### 🏠 Home Page
+<img src="./Screenshots/home.png" alt="Home Page" width="800"/>
+
+### 🔐 Login Page
+<img src="./Screenshots/login.png" alt="Login Page" width="800"/>
+
+### 📝 Register Page
+<img src="./Screenshots/register.png" alt="Register Page" width="800"/>
+
+### 📋 Dashboard
+<img src="./Screenshots/dashboard.png" alt="Dashboard" width="800"/>
+
+### 🌙 Dark Mode Dashboard
+<img src="./Screenshots/darkmode-dashboard.png" alt="Dark Mode Dashboard" width="800"/>
+
+### ➕ Add Task
+<img src="./Screenshots/addtask.png" alt="Add Task" width="800"/>
+
+### 🗑️ Delete Task
+<img src="./Screenshots/delete_task.png" alt="Delete Task" width="800"/>
+
+
+---
+
 ## Project Structure
 
 ### Frontend Structure
