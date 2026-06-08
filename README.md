@@ -1,5 +1,9 @@
 # TaskFlow - MERN Task Management Application
 
+## Live Demo
+
+🔗 https://task-management-web-application-seven.vercel.app/
+
 ## Overview
 
 TaskFlow is a full-stack Task Management Web Application built using the MERN Stack (MongoDB, Express.js, React.js, and Node.js).
@@ -52,6 +56,7 @@ The application allows users to register, log in securely using JWT authenticati
 * Tailwind CSS
 * React Icons
 * Fetch API
+* Dark Mode Support
 
 ### Backend
 
@@ -115,6 +120,8 @@ task-manager-frontend/
 ├── index.html
 ├── package.json
 └── vite.config.js 
+```
+
 
 ### Backend Structure
 
@@ -220,7 +227,7 @@ NODE_ENV=development
 ### Clone Repository
 
 ```bash
-git clone https://github.com/Sagar10joshi/Task-Management-Web-Application
+git clone https://github.com/Sagar10joshi/Task-Management-Web-Application.git
 ```
 
 ---

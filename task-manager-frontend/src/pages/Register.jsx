@@ -198,7 +198,7 @@ export default function Register() {
                     ? 'border-red-500 bg-red-50 focus:border-red-600'
                     : 'border-slate-200 bg-slate-50 focus:border-purple-500 focus:bg-white'
                   }`}
-                placeholder="John Doe"
+                placeholder="Enter your full name"
               />
               {errors.fullName && (
                 <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>
